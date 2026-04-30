@@ -18,8 +18,7 @@
 #define FOREGROUND_COLOR 0xFF5050FF
 
 
-
-static uint32_t pixels[HEIGHT*WIDTH];
+NVC_Canvas pixels = { .height = HEIGHT, .width = WIDTH, .stride = WIDTH, .data = 0 };
 
 float lerpf(float a, float b, float t)
 {
@@ -29,10 +28,10 @@ float lerpf(float a, float b, float t)
 bool blank_example(void)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+    NVC_Fill(pixels, BACKGROUND_COLOR);
 
     const char *file_path = "blank.ppm";
-    Errno err = NVC_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
@@ -44,21 +43,27 @@ bool blank_example(void)
 bool rectangle_example(void)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+    NVC_Fill(pixels, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
             if ((x+y)%2) {
-                NVC_Fill_Rectangle(pixels, WIDTH, HEIGHT, x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, FOREGROUND_COLOR);
+                NVC_Fill_Rectangle(pixels,
+                        (Vec2D){ x*CELL_WIDTH, y*CELL_HEIGHT },
+                        (Vec2D){ CELL_WIDTH, CELL_HEIGHT },
+                        FOREGROUND_COLOR);
             } else {
-                NVC_Fill_Rectangle(pixels, WIDTH, HEIGHT, x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, BACKGROUND_COLOR);
+                NVC_Fill_Rectangle(pixels,
+                        (Vec2D){ x*CELL_WIDTH, y*CELL_HEIGHT },
+                        (Vec2D){ CELL_WIDTH, CELL_HEIGHT },
+                        BACKGROUND_COLOR);
             }
         }
 
     }
 
     const char *file_path = "rectangle.ppm";
-    Errno err = NVC_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
@@ -70,7 +75,7 @@ bool rectangle_example(void)
 bool circle_example(void)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+    NVC_Fill(pixels, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
@@ -80,14 +85,15 @@ bool circle_example(void)
 
             float radius = CELL_WIDTH;
             if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
-            NVC_Fill_Circle(pixels, WIDTH, HEIGHT,
-                            x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2, lerpf(0, radius/2, t),
+            NVC_Fill_Circle(pixels,
+                            (Vec2D){ x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2 },
+                            lerpf(0, radius/2, t),
                             FOREGROUND_COLOR);
         }
     }
 
     const char *file_path = "circle.ppm";
-    Errno err = NVC_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
@@ -99,22 +105,22 @@ bool circle_example(void)
 bool lines_example(void)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+    NVC_Fill(pixels, BACKGROUND_COLOR);
 
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, 0xFF0000FF);
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, 0, HEIGHT, WIDTH, 0, 0xFF0000FF);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ WIDTH, HEIGHT },   0xFF0000FF);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ WIDTH, 0 },        0xFF0000FF);
 
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, 0, 0, WIDTH/2, HEIGHT, 0xFF00FF00);
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, 0, HEIGHT, WIDTH/2, 0, 0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ WIDTH/2, HEIGHT }, 0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ WIDTH/2, 0 },      0xFF00FF00);
 
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, WIDTH/2, 0, WIDTH, HEIGHT, 0xFF00FF00);
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, WIDTH/2, HEIGHT, WIDTH, 0, 0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, 0 },      (Vec2D){ WIDTH, HEIGHT },   0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, HEIGHT }, (Vec2D){ WIDTH, 0 },        0xFF00FF00);
 
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, 0, HEIGHT/2, WIDTH, HEIGHT/2, 0xFFFF0000);
-    NVC_Draw_Line(pixels, WIDTH, HEIGHT, WIDTH/2, 0, WIDTH/2, HEIGHT, 0xFFFF0000);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT/2 },     (Vec2D){ WIDTH, HEIGHT/2 }, 0xFFFF0000);
+    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, 0 },      (Vec2D){ WIDTH/2, HEIGHT }, 0xFFFF0000);
 
     const char *file_path = "lines.ppm";
-    Errno err = NVC_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;

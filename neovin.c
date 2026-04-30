@@ -8,11 +8,16 @@
 #include <errno.h>
 
 typedef struct {
-    size_t rows;
-    size_t cols;
+    size_t height;
+    size_t width;
     size_t stride;
-    uint32_t *es;
+    uint32_t *data;
 } NVC_Canvas;
+
+typedef struct {
+    int x;
+    int y;
+} Vec2D;
 
 void swap_int(int *a, int *b)
 {
@@ -21,38 +26,38 @@ void swap_int(int *a, int *b)
     *b = t;
 }
 
-void NVC_Fill(uint32_t *pixels, size_t width, size_t height, uint32_t color)
+void NVC_Fill(NVC_Canvas pixels, uint32_t color)
 {
-    for (size_t i = 0; i < width*height; ++i) {
-        pixels[i] = color;
+    for (size_t i = 0; i < pixels.width*pixels.height; ++i) {
+        pixels.data[i] = color;
     }
 }
 
-void NVC_Fill_Rectangle(uint32_t *pixels, size_t pixels_width, size_t pixels_height, int x0, int y0, size_t w, size_t h, uint32_t color)
+void NVC_Fill_Rectangle(NVC_Canvas pixels, Vec2D position, Vec2D size, uint32_t color)
 {
-    for (int dy = 0; dy < (int)h; ++dy) {
-        int y = y0 + dy;
-        if (0 <= y && y < (int)pixels_height) {
-            for (int dx = 0; dx < (int)w; ++dx) {
-                int x = x0 + dx;
-                if (0 <= x && x < (int)pixels_width) {
-                    pixels[y*pixels_width + x] = color;
+    for (int dy = 0; dy < (int)size.y; ++dy) {
+        int y = position.y + dy;
+        if (0 <= y && y < (int)pixels.height) {
+            for (int dx = 0; dx < (int)size.x; ++dx) {
+                int x = position.x + dx;
+                if (0 <= x && x < (int)pixels.width) {
+                    pixels.data[y*pixels.width + x] = color;
                 }
             }
         }
     }
 }
 
-void NVC_Fill_Circle(uint32_t *pixels, size_t pixels_width, size_t pixels_height, int cx, int cy, float radius, uint32_t color)
+void NVC_Fill_Circle(NVC_Canvas pixels, Vec2D position, float radius, uint32_t color)
 {
     for (int dy = -(int)radius - 1; (float)dy <= radius; ++dy) {
-        int y = cy + dy;
-        if (0 <= y && y < (int)pixels_height) {
+        int y = position.y + dy;
+        if (0 <= y && y < (int)pixels.height) {
             for (int dx = -(int)radius - 1; (float)dx < radius; ++dx) {
-                int x = cx + dx;
-                if (0 <= x && x < (int)pixels_width) {
+                int x = position.x + dx;
+                if (0 <= x && x < (int)pixels.width) {
                     if ((float)dx*(float)dx + (float)dy*(float)dy <= radius*radius) {
-                        pixels[y*pixels_width + x] = color;
+                        pixels.data[y*pixels.width + x] = color;
                     }
                 }
             }
@@ -60,7 +65,7 @@ void NVC_Fill_Circle(uint32_t *pixels, size_t pixels_width, size_t pixels_height
     }
 }
 
-void NVC_Draw_Line(uint32_t *pixels, size_t pixels_width, size_t pixels_height, int x1, int y1, int x2, int y2, uint32_t color)
+void NVC_Draw_Line(NVC_Canvas pixels, Vec2D point1, Vec2D point2, uint32_t color)
 {
     // (x - x1)(y2 - y1) - (y - y1)(x2 - x1) = 0
     // (y2 - y1)x + (x1 - x2)y + (y1 - y2)x1 + (x2 - x1)y1 = 0
@@ -68,42 +73,42 @@ void NVC_Draw_Line(uint32_t *pixels, size_t pixels_width, size_t pixels_height, 
     //
     // ((y1 - y2)x + (x2 - x1)y + x1y2 - x2y1)/(sqrt((y1 - y2)^2 + (x2 - x1)^2))
 
-    if (x2 != x1) {
-        float k = (float)(y2 - y1)/(float)(x2 - x1);
+    if (point2.x != point1.x) {
+        float k = (float)(point2.y - point1.y)/(float)(point2.x - point1.x);
 
         if (-1.f <= k && k <= 1.f) {
-            float c = (float)y1 - k*(float)x1;
-            if (x1 > x2) swap_int(&x1, &x2);
-            for (int x = x1; x <= x2; ++x) {
-                if (0 <= x && x < (int)pixels_width) {
+            float c = (float)point1.y - k*(float)point1.x;
+            if (point1.x > point2.x) swap_int(&point1.x, &point2.x);
+            for (int x = point1.x; x <= point2.x; ++x) {
+                if (0 <= x && x < (int)pixels.width) {
                     int y = (int)(k*(float)x + c);
-                    if (0 <= y && y < (int)pixels_height) {
-                        pixels[y*pixels_width + x] = color;
+                    if (0 <= y && y < (int)pixels.height) {
+                        pixels.data[y*pixels.width + x] = color;
                     }
 
                 }
             }
         } else {
             k = 1 / k;
-            float c = (float)x1 - k*(float)y1;
-            if (y1 > y2) swap_int(&y1, &y2);
-            for (int y = y1; y <= y2; ++y) {
-                if (0 <= y && y < (int)pixels_height) {
+            float c = (float)point1.x - k*(float)point1.y;
+            if (point1.y > point2.y) swap_int(&point1.y, &point2.y);
+            for (int y = point1.y; y <= point2.y; ++y) {
+                if (0 <= y && y < (int)pixels.height) {
                     int x = (int)(k*(float)y + c);
-                    if (0 <= x && x < (int)pixels_width) {
-                        pixels[y*pixels_width + x] = color;
+                    if (0 <= x && x < (int)pixels.width) {
+                        pixels.data[y*pixels.width + x] = color;
                     }
 
                 }
             }
         }
     } else {
-        int x = x1;
-        if (0 < x && x < (int)pixels_width) {
-            if (y1 > y2) swap_int(&y1, &y2);
-            for (int y = y1; y <= y2; ++y) {
-                if (0 <= y && y < (int)pixels_height) {
-                    pixels[y*pixels_width + x] = color;
+        int x = point1.x;
+        if (0 < x && x < (int)pixels.width) {
+            if (point1.y > point2.y) swap_int(&point1.y, &point2.y);
+            for (int y = point1.y; y <= point2.y; ++y) {
+                if (0 <= y && y < (int)pixels.height) {
+                    pixels.data[y*pixels.width + x] = color;
                 }
             }
         }
@@ -114,7 +119,7 @@ typedef int Errno;
 
 #define return_defer(value) do { result = (value); goto defer; } while (0)
 
-Errno NVC_save_to_ppm_file(uint32_t *pixels, size_t width, size_t height, const char *file_path)
+Errno NVC_save_to_ppm_file(NVC_Canvas pixels, const char *file_path)
 {
     int result = 0;
     FILE *f = NULL;
@@ -123,12 +128,12 @@ Errno NVC_save_to_ppm_file(uint32_t *pixels, size_t width, size_t height, const 
         f = fopen(file_path, "wb");
         if (f == NULL) return_defer(errno);
 
-        fprintf(f, "P6\n%zu %zu 255\n", width, height);
+        fprintf(f, "P6\n%zu %zu 255\n", pixels.width, pixels.height);
         if (ferror(f)) return_defer(errno);
 
-        for (size_t i = 0; i < width*height; ++i) {
+        for (size_t i = 0; i < pixels.width*pixels.height; ++i) {
             // 0xAABBGGRR
-            uint32_t pixel = pixels[i];
+            uint32_t pixel = pixels.data[i];
             uint8_t bytes[3] = {
                 (pixel>>(8*0))&0xFF,
                 (pixel>>(8*1))&0xFF,
