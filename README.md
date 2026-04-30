@@ -11,8 +11,8 @@ $ ./example
 
 ## Gallery
 
-![rectangle](./img/rectangle.png)
+![rectangle](./imgs/rectangle.png)
 
-![circle](./img/circle.png)
+![circle](./imgs/circle.png)
 
-![lines](./img/lines.png)
+![lines](./imgs/lines.png)
