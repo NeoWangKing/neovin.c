@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -18,32 +19,66 @@
 #define FOREGROUND_COLOR 0xFF5050FF
 
 
-NVC_Canvas pixels = { .height = HEIGHT, .width = WIDTH, .stride = WIDTH, .data = 0 };
+
+NVC_Canvas pixels = {0};
 
 float lerpf(float a, float b, float t)
 {
     return a + (b - a)*t;
 }
 
-bool blank_example(void)
-{
-    // 0xAABBGGRR
-    NVC_Fill(pixels, BACKGROUND_COLOR);
+typedef int Errno;
 
-    const char *file_path = "blank.ppm";
+#define return_defer(value) do { result = (value); goto defer; } while (0)
+
+Errno NVC_save_to_ppm_file(NVC_Canvas pixels, const char *file_path)
+{
+    int result = 0;
+    FILE *f = NULL;
+
+    {
+        f = fopen(file_path, "wb");
+        if (f == NULL) return_defer(errno);
+
+        fprintf(f, "P6\n%d %d 255\n", pixels.width, pixels.height);
+        if (ferror(f)) return_defer(errno);
+
+        for (int i = 0; i < pixels.width*pixels.height; ++i) {
+            // 0xAABBGGRR
+            uint32_t pixel = pixels.data[i];
+            uint8_t bytes[3] = {
+                (pixel>>(8*0))&0xFF,
+                (pixel>>(8*1))&0xFF,
+                (pixel>>(8*2))&0xFF,
+            };
+            fwrite(bytes, sizeof(bytes), 1, f);
+            if (ferror(f)) return_defer(errno);
+        }
+    }
+
+defer:
+    if (f) fclose(f);
+    return result;
+}
+
+bool blank_example(const char *file_path) {
+    // 0xAABBGGRR
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+
     Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
 
+    printf("INFO: save file %s\n", file_path);
     return true;
 }
 
-bool rectangle_example(void)
+bool rectangles_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
@@ -62,20 +97,20 @@ bool rectangle_example(void)
 
     }
 
-    const char *file_path = "rectangle.ppm";
     Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
 
+    printf("INFO: save file %s\n", file_path);
     return true;
 }
 
-bool circle_example(void)
+bool circles_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
@@ -86,54 +121,86 @@ bool circle_example(void)
             float radius = CELL_WIDTH;
             if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
             NVC_Fill_Circle(pixels,
-                            (Vec2D){ x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2 },
+                            (Vec2D){ x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2 },
                             lerpf(0, radius/2, t),
                             FOREGROUND_COLOR);
         }
     }
 
-    const char *file_path = "circle.ppm";
     Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
 
+    printf("INFO: save file %s\n", file_path);
     return true;
 }
 
-bool lines_example(void)
+bool lines_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
 
     NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ WIDTH, HEIGHT },   0xFF0000FF);
     NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ WIDTH, 0 },        0xFF0000FF);
 
-    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ WIDTH/2, HEIGHT }, 0xFF00FF00);
-    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ WIDTH/2, 0 },      0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ (float)WIDTH/2, HEIGHT }, 0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ (float)WIDTH/2, 0 },      0xFF00FF00);
 
-    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, 0 },      (Vec2D){ WIDTH, HEIGHT },   0xFF00FF00);
-    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, HEIGHT }, (Vec2D){ WIDTH, 0 },        0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, 0 },      (Vec2D){ WIDTH, HEIGHT },   0xFF00FF00);
+    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, HEIGHT }, (Vec2D){ WIDTH, 0 },        0xFF00FF00);
 
-    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT/2 },     (Vec2D){ WIDTH, HEIGHT/2 }, 0xFFFF0000);
-    NVC_Draw_Line(pixels, (Vec2D){ WIDTH/2, 0 },      (Vec2D){ WIDTH/2, HEIGHT }, 0xFFFF0000);
+    NVC_Draw_Line(pixels, (Vec2D){ 0, (float)HEIGHT/2 },     (Vec2D){ WIDTH, (float)HEIGHT/2 }, 0xFFFFFF00);
+    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, 0 },      (Vec2D){ (float)WIDTH/2, HEIGHT }, 0xFFFFFF00);
 
-    const char *file_path = "lines.ppm";
     Errno err = NVC_save_to_ppm_file(pixels, file_path);
     if (err) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
 
+    printf("INFO: save file %s\n", file_path);
+    return true;
+}
+
+bool triangles_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+
+    for (int y = 0; y < ROWS; ++y) {
+        for (int x = 0; x < COLS; ++x) {
+            NVC_Fill_Triangle(pixels,
+                    (Vec2D) { x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT },
+                    (Vec2D) { x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT },
+                    (Vec2D) { x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT },
+                    FOREGROUND_COLOR);
+        }
+
+    }
+
+    Errno err = NVC_save_to_ppm_file(pixels, file_path);
+    if (err) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+
+    printf("INFO: save file %s\n", file_path);
     return true;
 }
 
 int main(void)
 {
-    if (!blank_example()) return -1;
-    if (!rectangle_example()) return -1;
-    if (!circle_example()) return -1;
-    if (!lines_example()) return -1;
+    pixels.width = WIDTH;
+    pixels.height = HEIGHT;
+    pixels.stride = WIDTH;
+    pixels.data = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600);
+
+    if (!blank_example("examples/blank.ppm")) return -1;
+    if (!rectangles_example("examples/rectangles.ppm")) return -1;
+    if (!circles_example("examples/circles.ppm")) return -1;
+    if (!lines_example("examples/lines.ppm")) return -1;
+    if (!triangles_example("examples/triangles.ppm")) return -1;
     return 0;
 }
