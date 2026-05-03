@@ -19,10 +19,7 @@ function make_environment(...envs) {
 
 WebAssembly.instantiateStreaming(fetch('./bin/wasm.wasm'), {
   "env": make_environment({
-    "sqrtf": Math.sqrt,
-    "atan2f": Math.atan2,
-    "cosf": Math.cos,
-    "sinf": Math.sin,
+
   })
 }).then(w0 => {
   w = w0;

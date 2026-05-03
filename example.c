@@ -7,7 +7,7 @@
 #include <errno.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "./stb_image_write.h"
+#include "./thirdparty/stb_image_write.h"
 
 #define NEOVIN_C_IMPLEMENTATION
 #include "neovin.c"

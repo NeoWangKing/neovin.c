@@ -1,7 +1,6 @@
-#include "neovin.c"
-// #include <math.h>
+#define NEOVIN_C_IMPLEMENTATION
+#include "../neovin.c"
 #include <stdint.h>
-// #include <stdlib.h>
 
 #define WIDTH 800
 #define HEIGHT 600
