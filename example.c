@@ -22,7 +22,7 @@
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
 
-NVC_Canvas pixels = {0};
+NVC_Canvas oc = {0};
 
 float lerpf(float a, float b, float t)
 {
@@ -47,7 +47,7 @@ Errno NVC_save_to_ppm_file(NVC_Canvas pixels, const char *file_path)
 
         for (int i = 0; i < pixels.width*pixels.height; ++i) {
             // 0xAABBGGRR
-            uint32_t pixel = pixels.data[i];
+            uint32_t pixel = pixels.pixels[i];
             uint8_t bytes[3] = {
                 (pixel>>(8*0))&0xFF,
                 (pixel>>(8*1))&0xFF,
@@ -65,9 +65,9 @@ defer:
 
 bool blank_example(const char *file_path) {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -79,26 +79,26 @@ bool blank_example(const char *file_path) {
 bool rectangles_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
             if ((x+y)%2) {
-                NVC_Fill_Rectangle(pixels,
-                        (Vec2D){ x*CELL_WIDTH, y*CELL_HEIGHT },
-                        (Vec2D){ CELL_WIDTH, CELL_HEIGHT },
+                NVC_Fill_Rectangle(oc,
+                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
+                        Vec2D(CELL_WIDTH, CELL_HEIGHT),
                         FOREGROUND_COLOR);
             } else {
-                NVC_Fill_Rectangle(pixels,
-                        (Vec2D){ x*CELL_WIDTH, y*CELL_HEIGHT },
-                        (Vec2D){ CELL_WIDTH, CELL_HEIGHT },
+                NVC_Fill_Rectangle(oc,
+                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
+                        Vec2D(CELL_WIDTH, CELL_HEIGHT),
                         BACKGROUND_COLOR);
             }
         }
 
     }
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -110,7 +110,7 @@ bool rectangles_example(const char *file_path)
 bool circles_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
@@ -120,14 +120,30 @@ bool circles_example(const char *file_path)
 
             float radius = CELL_WIDTH;
             if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
-            NVC_Fill_Circle(pixels,
-                            (Vec2D){ x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2 },
-                            lerpf(0, radius/2, t),
-                            FOREGROUND_COLOR);
+            if ((x+y)%2) {
+                NVC_Fill_Circle(oc,
+                        Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2),
+                        lerpf(0, radius/2, t),
+                        FOREGROUND_COLOR);
+            } else {
+                NVC_Draw_Circle(oc,
+                        Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2),
+                        lerpf(0, radius/2, t),
+                        2,
+                        FOREGROUND_COLOR);
+            }
         }
     }
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    for (int i = 5; i > 0; --i) {
+        NVC_Draw_Circle(oc,
+                Vec2D((float)WIDTH/2, (float)HEIGHT/2),
+                lerpf(0, (float)HEIGHT/2, (float)i/5),
+                2,
+                0xFF20FF20);
+    }
+
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -139,21 +155,21 @@ bool circles_example(const char *file_path)
 bool lines_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ WIDTH, HEIGHT },   0xFF0000FF);
-    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ WIDTH, 0 },        0xFF0000FF);
+    NVC_Draw_Line(oc, Vec2D(0, 0), Vec2D(WIDTH, HEIGHT), 0xFF0000FF);
+    NVC_Draw_Line(oc, Vec2D(0, HEIGHT), Vec2D(WIDTH, 0), 0xFF0000FF);
 
-    NVC_Draw_Line(pixels, (Vec2D){ 0, 0 },            (Vec2D){ (float)WIDTH/2, HEIGHT }, 0xFF00FF00);
-    NVC_Draw_Line(pixels, (Vec2D){ 0, HEIGHT },       (Vec2D){ (float)WIDTH/2, 0 },      0xFF00FF00);
+    NVC_Draw_Line(oc, Vec2D(0, 0), Vec2D((float)WIDTH/2, HEIGHT), 0xFF00FF00);
+    NVC_Draw_Line(oc, Vec2D(0, HEIGHT), Vec2D((float)WIDTH/2, 0), 0xFF00FF00);
 
-    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, 0 },      (Vec2D){ WIDTH, HEIGHT },   0xFF00FF00);
-    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, HEIGHT }, (Vec2D){ WIDTH, 0 },        0xFF00FF00);
+    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, 0), Vec2D(WIDTH, HEIGHT), 0xFF00FF00);
+    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, HEIGHT), Vec2D(WIDTH, 0), 0xFF00FF00);
 
-    NVC_Draw_Line(pixels, (Vec2D){ 0, (float)HEIGHT/2 },     (Vec2D){ WIDTH, (float)HEIGHT/2 }, 0xFFFFFF00);
-    NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, 0 },      (Vec2D){ (float)WIDTH/2, HEIGHT }, 0xFFFFFF00);
+    NVC_Draw_Line(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 0xFFFFFF00);
+    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 0xFFFFFF00);
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -165,20 +181,20 @@ bool lines_example(const char *file_path)
 bool triangles_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
-            NVC_Fill_Triangle(pixels,
-                    (Vec2D) { x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT },
-                    (Vec2D) { x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT },
-                    (Vec2D) { x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT },
+            NVC_Fill_Triangle(oc,
+                    Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
+                    Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                    Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
                     FOREGROUND_COLOR);
         }
 
     }
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -190,14 +206,35 @@ bool triangles_example(const char *file_path)
 bool alpha_blending_example(const char *file_path)
 {
     // 0xAABBGGRR
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
-    NVC_Fill_Rectangle(pixels, (Vec2D) { 0, 0 }, (Vec2D) { (float)WIDTH*2/3, (float)HEIGHT*2/3 }, 0x880000FF);
-    NVC_Fill_Rectangle(pixels, (Vec2D) { (float)WIDTH, (float)HEIGHT }, (Vec2D) { (float)-WIDTH*2/3, (float)-HEIGHT*2/3 }, 0x22FF0000);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+    NVC_Fill_Rectangle(oc, Vec2D(0, 0), Vec2D((float)WIDTH*2/3, (float)HEIGHT*2/3), 0x880000FF);
+    NVC_Fill_Rectangle(oc, Vec2D((float)WIDTH, (float)HEIGHT), Vec2D((float)-WIDTH*2/3, (float)-HEIGHT*2/3), 0x22FF0000);
 
 
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+
+    printf("INFO: save file %s\n", file_path);
+    return true;
+}
+
+bool subcanvas_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    NVC_Canvas sub_oc;
+
+    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH/4, (float)HEIGHT/4), Vec2D((float)WIDTH/2, (float)HEIGHT/2));
+
+    NVC_Fill_Background(sub_oc, 0xFF5050FF);
+    NVC_Fill_Rectangle(sub_oc, Vec2D(0, 0), Vec2D((float)WIDTH/4, (float)HEIGHT/3), 0xFF2020AA);
+
+    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -208,10 +245,10 @@ bool alpha_blending_example(const char *file_path)
 
 int main(void)
 {
-    pixels.width = WIDTH;
-    pixels.height = HEIGHT;
-    pixels.stride = WIDTH;
-    pixels.data = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600);
+    oc.width = WIDTH;
+    oc.height = HEIGHT;
+    oc.stride = WIDTH;
+    oc.pixels = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600);
 
     if (!blank_example("examples/blank.png")) return -1;
     if (!rectangles_example("examples/rectangles.png")) return -1;
@@ -219,5 +256,6 @@ int main(void)
     if (!lines_example("examples/lines.png")) return -1;
     if (!triangles_example("examples/triangles.png")) return -1;
     if (!alpha_blending_example("examples/alpha_blending.png")) return -1;
+    if (!subcanvas_example("examples/subcanvas.png")) return -1;
     return 0;
 }

@@ -13,7 +13,7 @@
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
 
-NVC_Canvas pixels;
+NVC_Canvas oc;
 float angle = 0.f;
 
 float get_angle() {
@@ -52,12 +52,12 @@ uint32_t *render(float dt)
 
     angle += 2*M_PI*dt;
 
-    pixels.width = WIDTH;
-    pixels.height = HEIGHT;
-    pixels.stride = WIDTH;
-    pixels.data = data;
+    oc.width = WIDTH;
+    oc.height = HEIGHT;
+    oc.stride = WIDTH;
+    oc.pixels = data;
 
-    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     Vec2D p1 = { 400, 100 };
     Vec2D p2 = { 100, 300 };
@@ -66,7 +66,10 @@ uint32_t *render(float dt)
     rotate_point(&p1, center, angle);
     rotate_point(&p2, center, angle);
     rotate_point(&p3, center, angle);
-    NVC_Fill_Triangle(pixels, p1, p2, p3, 0xFF2020AA);
+    NVC_Fill_Triangle(oc, p1, p2, p3, 0xFF2020AA);
+
+    Vec2D p4 = { 400, 300 };
+    NVC_Fill_Circle(oc, p4, 200, 0x66AA2020);
 
     return data;
 }
