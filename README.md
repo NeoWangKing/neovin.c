@@ -19,4 +19,4 @@ $ ./example
 
 ![triangles](./examples/triangles.png)
 
-![alpha-blending](./examples/alpha-blending.png)
+![alpha-blending](./examples/alpha_blending.png)
