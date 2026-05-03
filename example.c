@@ -6,6 +6,9 @@
 #include <string.h>
 #include <errno.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "./stb_image_write.h"
+
 #include "neovin.c"
 
 #define WIDTH 800
@@ -17,8 +20,6 @@
 
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
-
-
 
 NVC_Canvas pixels = {0};
 
@@ -61,12 +62,20 @@ defer:
     return result;
 }
 
+bool NVC_save_to_png_file(NVC_Canvas pixels, const char *file_path)
+{
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+        fprintf(stderr, "ERROR: could not save file %s: %s", file_path, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
 bool blank_example(const char *file_path) {
     // 0xAABBGGRR
     NVC_Fill_Background(pixels, BACKGROUND_COLOR);
 
-    Errno err = NVC_save_to_ppm_file(pixels, file_path);
-    if (err) {
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -97,8 +106,7 @@ bool rectangles_example(const char *file_path)
 
     }
 
-    Errno err = NVC_save_to_ppm_file(pixels, file_path);
-    if (err) {
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -127,8 +135,7 @@ bool circles_example(const char *file_path)
         }
     }
 
-    Errno err = NVC_save_to_ppm_file(pixels, file_path);
-    if (err) {
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -154,8 +161,7 @@ bool lines_example(const char *file_path)
     NVC_Draw_Line(pixels, (Vec2D){ 0, (float)HEIGHT/2 },     (Vec2D){ WIDTH, (float)HEIGHT/2 }, 0xFFFFFF00);
     NVC_Draw_Line(pixels, (Vec2D){ (float)WIDTH/2, 0 },      (Vec2D){ (float)WIDTH/2, HEIGHT }, 0xFFFFFF00);
 
-    Errno err = NVC_save_to_ppm_file(pixels, file_path);
-    if (err) {
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -180,8 +186,26 @@ bool triangles_example(const char *file_path)
 
     }
 
-    Errno err = NVC_save_to_ppm_file(pixels, file_path);
-    if (err) {
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+
+    printf("INFO: save file %s\n", file_path);
+    return true;
+}
+
+bool alpha_blending_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+
+    NVC_Fill_Background(pixels, BACKGROUND_COLOR);
+    NVC_Fill_Rectangle(pixels, (Vec2D) { 0, 0 }, (Vec2D) { (float)WIDTH*2/3, (float)HEIGHT*2/3 }, 0x880000FF);
+    NVC_Fill_Rectangle(pixels, (Vec2D) { (float)WIDTH, (float)HEIGHT }, (Vec2D) { (float)-WIDTH*2/3, (float)-HEIGHT*2/3 }, 0x22FF0000);
+
+
+    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
     }
@@ -197,10 +221,11 @@ int main(void)
     pixels.stride = WIDTH;
     pixels.data = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600);
 
-    if (!blank_example("examples/blank.ppm")) return -1;
-    if (!rectangles_example("examples/rectangles.ppm")) return -1;
-    if (!circles_example("examples/circles.ppm")) return -1;
-    if (!lines_example("examples/lines.ppm")) return -1;
-    if (!triangles_example("examples/triangles.ppm")) return -1;
+    if (!blank_example("examples/blank.png")) return -1;
+    if (!rectangles_example("examples/rectangles.png")) return -1;
+    if (!circles_example("examples/circles.png")) return -1;
+    if (!lines_example("examples/lines.png")) return -1;
+    if (!triangles_example("examples/triangles.png")) return -1;
+    if (!alpha_blending_example("examples/alpha_blending.png")) return -1;
     return 0;
 }
