@@ -112,6 +112,14 @@ bool circles_example(const char *file_path)
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
+    for (int i = 5; i > 0; --i) {
+        NVC_Draw_Circle(oc,
+                Vec2D((float)WIDTH/2, (float)HEIGHT/2),
+                lerpf(0, (float)HEIGHT/2, (float)i/5),
+                2,
+                0xFF20FF20);
+    }
+
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
             float u = (float)x / COLS;
@@ -119,28 +127,22 @@ bool circles_example(const char *file_path)
             float t = (u + v)/2;
 
             float radius = CELL_WIDTH;
+            uint32_t color = 0xFF5050FF;
+            Transparent_Color(&color, t);
             if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
             if ((x+y)%2) {
                 NVC_Fill_Circle(oc,
                         Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2),
                         lerpf(0, radius/2, t),
-                        FOREGROUND_COLOR);
+                        color);
             } else {
                 NVC_Draw_Circle(oc,
                         Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT + (float)CELL_HEIGHT/2),
                         lerpf(0, radius/2, t),
                         2,
-                        FOREGROUND_COLOR);
+                        color);
             }
         }
-    }
-
-    for (int i = 5; i > 0; --i) {
-        NVC_Draw_Circle(oc,
-                Vec2D((float)WIDTH/2, (float)HEIGHT/2),
-                lerpf(0, (float)HEIGHT/2, (float)i/5),
-                2,
-                0xFF20FF20);
     }
 
     if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
@@ -185,11 +187,19 @@ bool triangles_example(const char *file_path)
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
-            NVC_Fill_Triangle(oc,
-                    Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
-                    Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
-                    Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
-                    FOREGROUND_COLOR);
+            if ((x+y)%2) {
+                NVC_Fill_Triangle(oc,
+                        Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                        FOREGROUND_COLOR);
+            } else {
+                NVC_Draw_Triangle(oc,
+                        Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                        FOREGROUND_COLOR);
+            }
         }
 
     }

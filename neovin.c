@@ -107,12 +107,12 @@ NEOVINCDEF float NVC_Vec2D_Angle(Vec2D vec)
 
 NEOVINCDEF Vec2D NVC_Vec2D_Add(Vec2D vec1, Vec2D vec2)
 {
-    return (Vec2D) { .x = vec1.x + vec2.x, .y = vec1.y + vec2.y };
+    return Vec2D(vec1.x + vec2.x, vec1.y + vec2.y);
 }
 
 NEOVINCDEF Vec2D NVC_Vec2D_Subtract(Vec2D vec1, Vec2D vec2)
 {
-    return (Vec2D) { .x = vec1.x - vec2.x, .y = vec1.y - vec2.y };
+    return Vec2D(vec1.x - vec2.x, vec1.y - vec2.y);
 }
 
 NEOVINCDEF float NVC_Vec2D_Dot(Vec2D vec1, Vec2D vec2)
@@ -158,6 +158,14 @@ NEOVINCDEF void Modi_Color(uint32_t *color, COLOR index, uint8_t value)
     *color = Pack_RGBA32(comp);
 }
 
+NEOVINCDEF void Transparent_Color(uint32_t *color, float alpha)
+{
+    uint8_t comp[COUNT_COMP];
+    Unpack_RGBA32(*color, comp);
+    comp[COMP_ALPHA] *= alpha;
+    *color = Pack_RGBA32(comp);
+}
+
 NEOVINCDEF uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t)
 {
     uint8_t comp_b[COUNT_COMP];
@@ -169,6 +177,8 @@ NEOVINCDEF uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t)
     uint8_t comp_f[COUNT_COMP];
 
     comp_f[COMP_ALPHA] = comp_t[COMP_ALPHA] + comp_b[COMP_ALPHA]*(255 - comp_t[COMP_ALPHA])/255;
+    if (comp_f[COMP_ALPHA] == 0) return 0x00000000;
+
     for (int i = 0; i < COMP_ALPHA; ++i) {
         uint32_t sum = (uint32_t)comp_t[i]*comp_t[COMP_ALPHA]*255
                      + (uint32_t)comp_b[i]*comp_b[COMP_ALPHA]*(255 - comp_t[COMP_ALPHA]);
@@ -233,18 +243,25 @@ NEOVINCDEF uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t)
     return Pack_RGBA32(comp_f);
 }
 
+NEOVINCDEF void NVC_Set_Pixel(NVC_Canvas oc, Vec2D location, uint32_t color)
+{
+    int x = (int)location.x;
+    int y = (int)location.y;
+    NVC_PIXEL(oc, x, y) = color;
+}
+
 NEOVINCDEF void NVC_Draw_Pixel(NVC_Canvas oc, Vec2D location, uint32_t color)
 {
     int x = (int)location.x;
     int y = (int)location.y;
-    oc.pixels[y*oc.stride + x] = NVC_Mix_Color_Alpha(oc.pixels[y*oc.stride + x], color);
+    NVC_PIXEL(oc, x, y) = NVC_Mix_Color_Alpha(NVC_PIXEL(oc, x, y), color);
 }
 
 NEOVINCDEF void NVC_Set_Background(NVC_Canvas oc, uint32_t color)
 {
     for (int y = 0; y < oc.height; ++y) {
         for (int x = 0; x < oc.width; ++x) {
-            oc.pixels[y*oc.stride + x] = color;
+            NVC_Set_Pixel(oc, Vec2D(x, y), color);
         }
     }
 }
@@ -253,7 +270,7 @@ NEOVINCDEF void NVC_Fill_Background(NVC_Canvas oc, uint32_t color)
 {
     for (int y = 0; y < oc.height; ++y) {
         for (int x = 0; x < oc.width; ++x) {
-            NVC_Draw_Pixel(oc, (Vec2D) { x, y }, color);
+            NVC_Draw_Pixel(oc, Vec2D(x, y), color);
         }
     }
 }
@@ -271,7 +288,7 @@ NEOVINCDEF void NVC_Fill_Rectangle(NVC_Canvas oc, Vec2D position, Vec2D size, ui
         int y = position.y + dy;
         int x = position.x + dx;
         if (0 <= x && x < oc.width && 0 <= y && y < oc.height) {
-            NVC_Draw_Pixel(oc, (Vec2D) { x, y }, color);
+            NVC_Draw_Pixel(oc, Vec2D(x, y), color);
         }
         dx += sx;
         if (dx == w) { dx = 0; dy += sy; }
@@ -297,8 +314,9 @@ NEOVINCDEF void NVC_Fill_Circle(NVC_Canvas oc, Vec2D position, float radius, uin
                         }
                     }
                     if (count > 0) {
-                        Modi_Color(&color, COMP_ALPHA, (uint8_t)(count*255/(AA_RES*AA_RES)));
-                        NVC_Draw_Pixel(oc, (Vec2D) { x, y }, color);
+                        uint32_t pixel_color = color;
+                        Transparent_Color(&pixel_color, ((float)count/(AA_RES*AA_RES)));
+                        NVC_Draw_Pixel(oc, Vec2D(x, y), pixel_color);
                     }
                 }
             }
@@ -324,8 +342,9 @@ NEOVINCDEF void NVC_Draw_Circle(NVC_Canvas oc, Vec2D position, float radius, flo
                         }
                     }
                     if (count > 0) {
-                        Modi_Color(&color, COMP_ALPHA, (uint8_t)(count*255/(AA_RES*AA_RES)));
-                        NVC_Draw_Pixel(oc, (Vec2D) { x, y }, color);
+                        uint32_t pixel_color = color;
+                        Transparent_Color(&pixel_color, ((float)count/(AA_RES*AA_RES)));
+                        NVC_Draw_Pixel(oc, Vec2D(x, y), pixel_color);
                     }
                 }
             }
@@ -349,13 +368,20 @@ NEOVINCDEF void NVC_Draw_Line(NVC_Canvas oc, Vec2D p1, Vec2D p2, uint32_t color)
     while (1) {
         // 只在画布范围内画点
         if (0 <= x1 && x1 < oc.width && 0 <= y1 && y1 < oc.height)
-            NVC_Draw_Pixel(oc, (Vec2D) { x1, y1 }, color);
+            NVC_Draw_Pixel(oc, Vec2D(x1, y1), color);
 
         if (x1 == x2 && y1 == y2) break;
         int e2 = 2 * err;
         if (e2 >= dy) { err += dy; x1 += sx; }
         if (e2 <= dx) { err += dx; y1 += sy; }
     }
+}
+
+NEOVINCDEF void NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
+{
+    NVC_Draw_Line(oc, p1, p2, color);
+    NVC_Draw_Line(oc, p2, p3, color);
+    NVC_Draw_Line(oc, p3, p1, color);
 }
 
 NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
@@ -378,11 +404,11 @@ NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, u
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
             if (0 <= x && x < oc.width && 0 <= y && y < oc.height) {
-                Vec2D v1 = NVC_Vec2D_Subtract((Vec2D) { x, y }, p1);
-                Vec2D v2 = NVC_Vec2D_Subtract((Vec2D) { x, y }, p2);
-                Vec2D v3 = NVC_Vec2D_Subtract((Vec2D) { x, y }, p3);
+                Vec2D v1 = NVC_Vec2D_Subtract(Vec2D(x, y), p1);
+                Vec2D v2 = NVC_Vec2D_Subtract(Vec2D(x, y), p2);
+                Vec2D v3 = NVC_Vec2D_Subtract(Vec2D(x, y), p3);
                 if (NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v2, v23)) && NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v3, v31))) {
-                    NVC_Draw_Pixel(oc, (Vec2D) { x, y }, color);
+                    NVC_Draw_Pixel(oc, Vec2D(x, y), color);
 
                 }
             }
