@@ -1,14 +1,7 @@
 #ifndef NEOVIN_C_
 #define NEOVIN_C_
 
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <stddef.h>
-#include <math.h>
-#include <stddef.h>
 #include <stdint.h>
-// #include <string.h>
-// #include <errno.h>
 
 #define NVC_SWAP(T, a, b) do { T t = a; a = b; b = t; } while (0)
 #define NVC_SIGN(T, x) ((T)((x) > 0) - (T)((x) < 0))
@@ -27,7 +20,7 @@ typedef struct {
 //     .width = 800,
 //     .height = 600,
 //     .stride = 800,
-//     .data = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600)  // 用户自己分配
+//     .data = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600)
 // };
 
 typedef struct {
@@ -35,7 +28,42 @@ typedef struct {
     float y;
 } Vec2D;
 
-float NVC_Vec2D_Len(Vec2D vec)
+float NVC_Vec2D_Length(Vec2D vec);
+float NVC_Vec2D_Angle(Vec2D vec);
+Vec2D NVC_Vec2D_Add(Vec2D vec1, Vec2D vec2);
+Vec2D NVC_Vec2D_Subtract(Vec2D vec1, Vec2D vec2);
+float NVC_Vec2D_Dot(Vec2D vec1, Vec2D vec2);
+float NVC_Vec2D_Cross(Vec2D vec1, Vec2D vec2);
+
+typedef enum {
+    COMP_RED = 0,
+    COMP_GREEN,
+    COMP_BLUE,
+    COMP_ALPHA,
+    COUNT_COMP
+} COLOR;
+
+void Unpack_RGBA32(uint32_t color, uint8_t comp[COUNT_COMP]);
+uint32_t Pack_RGBA32(uint8_t comp[COUNT_COMP]);
+uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t);
+uint32_t NVC_Blend_Color_Normal(uint32_t color_b, uint32_t color_t);
+uint32_t NVC_Blend_Color_Darken(uint32_t color_b, uint32_t color_t);
+uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t);
+
+void NVC_Draw_Pixel(NVC_Canvas pixels, Vec2D location, uint32_t color);
+void NVC_Fill_Background(NVC_Canvas pixels, uint32_t color);
+void NVC_Fill_Rectangle(NVC_Canvas pixels, Vec2D position, Vec2D size, uint32_t color);
+void NVC_Fill_Circle(NVC_Canvas pixels, Vec2D position, float radius, uint32_t color);
+void NVC_Draw_Line(NVC_Canvas pixels, Vec2D p1, Vec2D p2, uint32_t color);
+void NVC_Fill_Triangle(NVC_Canvas pixels, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color);
+
+#endif // NEOVIN_C_
+
+#ifdef NEOVIN_C_IMPLEMENTATION
+
+#include <math.h>
+
+float NVC_Vec2D_Length(Vec2D vec)
 {
     return sqrtf(vec.x*vec.x + vec.y*vec.y);
 }
@@ -65,78 +93,118 @@ float NVC_Vec2D_Cross(Vec2D vec1, Vec2D vec2)
     return (vec1.x*vec2.y - vec1.y*vec2.x);
 }
 
-void NVC_Fill_Background(NVC_Canvas pixels, uint32_t color)
+// =============================================================================
+
+void Unpack_RGBA32(uint32_t color, uint8_t comp[COUNT_COMP])
 {
-    for (int i = 0; i < pixels.width*pixels.height; ++i) {
-        pixels.data[i] = color;
+    for (int i = 0; i < COUNT_COMP; ++i) {
+        comp[i] = color&0xFF;
+        color >>= 8;
     }
 }
 
-typedef enum {
-    INDEX_RED = 0,
-    INDEX_GREEN,
-    INDEX_BLUE,
-    INDEX_ALPHA,
-    COUNT_INDEX
-} COLOR_INDEX;
-
-void Unpack_RGBA32(uint32_t c, uint8_t comp[COUNT_INDEX])
-{
-    for (int i = 0; i < COUNT_INDEX; ++i) {
-        comp[i] = c&0xFF;
-        c >>= 8;
-    }
-}
-
-uint32_t Pack_RGBA32(uint8_t comp[COUNT_INDEX])
+uint32_t Pack_RGBA32(uint8_t comp[COUNT_COMP])
 {
     uint32_t result = 0;
-    for (size_t i = 0; i < COUNT_INDEX; ++i) {
+    for (int i = 0; i < COUNT_COMP; ++i) {
         result |= comp[i]<<(8*i);
     }
     return result;
 }
 
-uint8_t NVC_Mix_Comp(uint16_t c1, uint16_t c2, uint16_t a)
+uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t)
 {
-    return c1 + (c2 - c1)*a/255;
-}
+    uint8_t comp_b[COUNT_COMP];
+    Unpack_RGBA32(color_b, comp_b);
 
-uint32_t NVC_Mix_Color(uint32_t c1, uint32_t c2)
-{
-    uint8_t comp1[COUNT_INDEX];
-    Unpack_RGBA32(c1, comp1);
+    uint8_t comp_t[COUNT_COMP];
+    Unpack_RGBA32(color_t, comp_t);
 
-    uint8_t comp2[COUNT_INDEX];
-    Unpack_RGBA32(c2, comp2);
+    uint8_t comp_f[COUNT_COMP];
 
-    for (size_t i = 0; i < INDEX_ALPHA; ++i) {
-        comp1[i] = NVC_Mix_Comp(comp1[i], comp2[i], comp2[INDEX_ALPHA]);
+    comp_f[COMP_ALPHA] = comp_t[COMP_ALPHA] + comp_b[COMP_ALPHA]*(255 - comp_t[COMP_ALPHA])/255;
+    for (int i = 0; i < COMP_ALPHA; ++i) {
+        uint32_t sum = (uint32_t)comp_t[i]*comp_t[COMP_ALPHA]*255
+                     + (uint32_t)comp_b[i]*comp_b[COMP_ALPHA]*(255 - comp_t[COMP_ALPHA]);
+        comp_f[i] = (uint8_t)(sum/ (255*comp_f[COMP_ALPHA]));
     }
 
-    return Pack_RGBA32(comp1);
+    return Pack_RGBA32(comp_f);
 }
+
+uint32_t NVC_Blend_Color_Normal(uint32_t color_b, uint32_t color_t)
+{
+    uint8_t comp_b[COUNT_COMP];
+    Unpack_RGBA32(color_b, comp_b);
+
+    uint8_t comp_t[COUNT_COMP];
+    Unpack_RGBA32(color_t, comp_t);
+
+    uint8_t comp_f[COUNT_COMP];
+
+    comp_f[COMP_ALPHA] = 255;
+    for (int i = 0; i < COMP_ALPHA; ++i) {
+        comp_f[i] = comp_t[i];
+    }
+
+    return Pack_RGBA32(comp_f);
+}
+
+uint32_t NVC_Blend_Color_Darken(uint32_t color_b, uint32_t color_t)
+{
+    uint8_t comp_b[COUNT_COMP];
+    Unpack_RGBA32(color_b, comp_b);
+
+    uint8_t comp_t[COUNT_COMP];
+    Unpack_RGBA32(color_t, comp_t);
+
+    uint8_t comp_f[COUNT_COMP];
+
+    comp_f[COMP_ALPHA] = 255;
+    for (int i = 0; i < COMP_ALPHA; ++i) {
+        comp_f[i] = comp_t[i];
+        if (comp_b[i] < comp_t[i]) comp_f[i] = comp_b[i];
+    }
+
+    return Pack_RGBA32(comp_f);
+}
+
+uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t)
+{
+    uint8_t comp_b[COUNT_COMP];
+    Unpack_RGBA32(color_b, comp_b);
+
+    uint8_t comp_t[COUNT_COMP];
+    Unpack_RGBA32(color_t, comp_t);
+
+    uint8_t comp_f[COUNT_COMP];
+
+    comp_f[COMP_ALPHA] = 255;
+    for (int i = 0; i < COMP_ALPHA; ++i) {
+        comp_f[i] = comp_t[i] * comp_b[i] / 255;
+    }
+
+    return Pack_RGBA32(comp_f);
+}
+
+// =============================================================================
 
 void NVC_Draw_Pixel(NVC_Canvas pixels, Vec2D location, uint32_t color)
 {
     int x = (int)location.x;
     int y = (int)location.y;
-    pixels.data[y*pixels.width + x] = NVC_Mix_Color(pixels.data[y*pixels.width + x], color);
+    pixels.data[y*pixels.width + x] = NVC_Mix_Color_Alpha(pixels.data[y*pixels.width + x], color);
 }
 
+void NVC_Fill_Background(NVC_Canvas pixels, uint32_t color)
+{
+    for (int i = 0; i < pixels.width*pixels.height; ++i) {
+        // pixels.data[i] = NVC_Mix_Color(pixels.data[i], color);
+        pixels.data[i] = color;
+    }
+}
 void NVC_Fill_Rectangle(NVC_Canvas pixels, Vec2D position, Vec2D size, uint32_t color)
 {
-    // for (int dy = 0; dy < (int)size.y; ++dy) {
-    //     int y = position.y + dy;
-    //     if (0 <= y && y < pixels.height) {
-    //         for (int dx = 0; dx < (int)size.x; ++dx) {
-    //             int x = position.x + dx;
-    //             if (0 <= x && x < pixels.width) {
-    //                 pixels.data[y*pixels.width + x] = color;
-    //             }
-    //         }
-    //     }
-    // }
     int w = (int)size.x;
     int h = (int)size.y;
     int sx = NVC_SIGN(int, w);

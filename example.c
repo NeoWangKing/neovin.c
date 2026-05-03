@@ -9,6 +9,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "./stb_image_write.h"
 
+#define NEOVIN_C_IMPLEMENTATION
 #include "neovin.c"
 
 #define WIDTH 800
@@ -60,15 +61,6 @@ Errno NVC_save_to_ppm_file(NVC_Canvas pixels, const char *file_path)
 defer:
     if (f) fclose(f);
     return result;
-}
-
-bool NVC_save_to_png_file(NVC_Canvas pixels, const char *file_path)
-{
-    if (!stbi_write_png(file_path, pixels.width, pixels.height, 4, pixels.data, pixels.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s", file_path, strerror(errno));
-        return false;
-    }
-    return true;
 }
 
 bool blank_example(const char *file_path) {
