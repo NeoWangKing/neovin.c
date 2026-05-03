@@ -11,9 +11,9 @@ $ ./example
 
 ## Gallery
 
-![rectangle](./examples/rectangle.png)
+![rectangle](./examples/rectangles.png)
 
-![circle](./examples/circle.png)
+![circle](./examples/circles.png)
 
 ![lines](./examples/lines.png)
 
