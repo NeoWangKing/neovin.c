@@ -87,12 +87,13 @@ bool rectangles_example(const char *file_path)
                 NVC_Fill_Rectangle(oc,
                         Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
                         Vec2D(CELL_WIDTH, CELL_HEIGHT),
-                        FOREGROUND_COLOR);
+                        0xCC2020FF);
             } else {
-                NVC_Fill_Rectangle(oc,
+                NVC_Draw_Rectangle(oc,
                         Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
                         Vec2D(CELL_WIDTH, CELL_HEIGHT),
-                        BACKGROUND_COLOR);
+                        4,
+                        0xCC20AA20);
             }
         }
 
@@ -159,17 +160,17 @@ bool lines_example(const char *file_path)
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    NVC_Draw_Line(oc, Vec2D(0, 0), Vec2D(WIDTH, HEIGHT), 0xFF0000FF);
-    NVC_Draw_Line(oc, Vec2D(0, HEIGHT), Vec2D(WIDTH, 0), 0xFF0000FF);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D(WIDTH, HEIGHT), 4, 0xFF0000FF);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D(WIDTH, 0), 4, 0xFF0000FF);
 
-    NVC_Draw_Line(oc, Vec2D(0, 0), Vec2D((float)WIDTH/2, HEIGHT), 0xFF00FF00);
-    NVC_Draw_Line(oc, Vec2D(0, HEIGHT), Vec2D((float)WIDTH/2, 0), 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D((float)WIDTH/2, HEIGHT), 4, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D((float)WIDTH/2, 0), 4, 0xFF00FF00);
 
-    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, 0), Vec2D(WIDTH, HEIGHT), 0xFF00FF00);
-    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, HEIGHT), Vec2D(WIDTH, 0), 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D(WIDTH, HEIGHT), 4, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, HEIGHT), Vec2D(WIDTH, 0), 4, 0xFF00FF00);
 
-    NVC_Draw_Line(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 0xFFFFFF00);
-    NVC_Draw_Line(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 0xFFFFFF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 4, 0xFFFFFF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 4, 0xFFFFFF00);
 
     if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
@@ -258,7 +259,7 @@ int main(void)
     oc.width = WIDTH;
     oc.height = HEIGHT;
     oc.stride = WIDTH;
-    oc.pixels = (uint32_t*)malloc(sizeof(uint32_t) * 800 * 600);
+    oc.pixels = (uint32_t*)malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
 
     if (!blank_example("examples/blank.png")) return -1;
     if (!rectangles_example("examples/rectangles.png")) return -1;

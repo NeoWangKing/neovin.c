@@ -3,7 +3,7 @@
 set -xe
 
 mkdir -p ./bin/
-gcc -Ithirdparty -Wall -Wextra -o ./bin/example example.c -lm
+gcc -O3 -Wall -Wextra -o ./bin/example example.c -lm
 
 ./bin/example
 # clang -Wall -Wextra --target=wasm32 -o ./Web/bin/wasm.o -c ./Web/wasm.c
