@@ -11,8 +11,12 @@ $ ./example
 
 ## Gallery
 
-![rectangle](./imgs/rectangle.png)
+![rectangle](./examples/rectangle.png)
 
-![circle](./imgs/circle.png)
+![circle](./examples/circle.png)
 
-![lines](./imgs/lines.png)
+![lines](./examples/lines.png)
+
+![triangles](./examples/triangles.png)
+
+![alpha-blending](./examples/alpha-blending.png)
