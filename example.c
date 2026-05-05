@@ -160,17 +160,17 @@ bool lines_example(const char *file_path)
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D(WIDTH, HEIGHT), 4, 0xFF0000FF);
-    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D(WIDTH, 0), 4, 0xFF0000FF);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D(WIDTH, HEIGHT), 6, 0xFF0000FF);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D(WIDTH, 0), 6, 0xFF0000FF);
 
-    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D((float)WIDTH/2, HEIGHT), 4, 0xFF00FF00);
-    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D((float)WIDTH/2, 0), 4, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, 0), Vec2D((float)WIDTH/2, HEIGHT), 6, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, HEIGHT), Vec2D((float)WIDTH/2, 0), 6, 0xFF00FF00);
 
-    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D(WIDTH, HEIGHT), 4, 0xFF00FF00);
-    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, HEIGHT), Vec2D(WIDTH, 0), 4, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D(WIDTH, HEIGHT), 6, 0xFF00FF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, HEIGHT), Vec2D(WIDTH, 0), 6, 0xFF00FF00);
 
-    NVC_Draw_Line_Ex(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 4, 0xFFFFFF00);
-    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 4, 0xFFFFFF00);
+    NVC_Draw_Line_Ex(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 6, 0xFFFFFF00);
+    NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 6, 0xFFFFFF00);
 
     if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
@@ -199,6 +199,7 @@ bool triangles_example(const char *file_path)
                         Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
                         Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
                         Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
+                        2,
                         FOREGROUND_COLOR);
             }
         }

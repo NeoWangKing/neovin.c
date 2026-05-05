@@ -105,12 +105,12 @@ NEOVINCDEF float NVC_Vec2D_Angle(Vec2D vec)
     return atan2f(vec.y, vec.x);
 }
 
-NEOVINCDEF Vec2D NVC_Vec2D_Add(Vec2D vec1, Vec2D vec2)
+NEOVINCDEF Vec2D NVC_Vec2D_Plus(Vec2D vec1, Vec2D vec2)
 {
     return Vec2D(vec1.x + vec2.x, vec1.y + vec2.y);
 }
 
-NEOVINCDEF Vec2D NVC_Vec2D_Subtract(Vec2D vec1, Vec2D vec2)
+NEOVINCDEF Vec2D NVC_Vec2D_Minus(Vec2D vec1, Vec2D vec2)
 {
     return Vec2D(vec1.x - vec2.x, vec1.y - vec2.y);
 }
@@ -469,11 +469,15 @@ NEOVINCDEF void NVC_Draw_Line(NVC_Canvas oc, Vec2D p1, Vec2D p2, uint32_t color)
     }
 }
 
-NEOVINCDEF void NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
+NEOVINCDEF bool NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3)
 {
-    NVC_Draw_Line(oc, p1, p2, color);
-    NVC_Draw_Line(oc, p2, p3, color);
-    NVC_Draw_Line(oc, p3, p1, color);
+    Vec2D v12 = NVC_Vec2D_Minus(p2, p1);
+    Vec2D v23 = NVC_Vec2D_Minus(p3, p2);
+    Vec2D v31 = NVC_Vec2D_Minus(p1, p3);
+    Vec2D v1 = NVC_Vec2D_Minus(p, p1);
+    Vec2D v2 = NVC_Vec2D_Minus(p, p2);
+    Vec2D v3 = NVC_Vec2D_Minus(p, p3);
+    return (NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v2, v23)) && NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v3, v31)));
 }
 
 NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
@@ -490,19 +494,24 @@ NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, u
     if (p2.y < y_min) y_min = p2.y;
     if (p3.x < x_min) x_min = p3.x;
     if (p3.y < y_min) y_min = p3.y;
-    Vec2D v12 = NVC_Vec2D_Subtract(p2, p1);
-    Vec2D v23 = NVC_Vec2D_Subtract(p3, p2);
-    Vec2D v31 = NVC_Vec2D_Subtract(p1, p3);
     int x1, x2, y1, y2;
     NVC_Normalize_Range(oc, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &x1, &x2, &y1, &y2);
     for (int y = y1; y <= y2; ++y) {
         for (int x = x1; x <= x2; ++x) {
-            Vec2D v1 = NVC_Vec2D_Subtract(Vec2D(x, y), p1);
-            Vec2D v2 = NVC_Vec2D_Subtract(Vec2D(x, y), p2);
-            Vec2D v3 = NVC_Vec2D_Subtract(Vec2D(x, y), p3);
-            if (NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v2, v23)) && NVC_SIGN(float, NVC_Vec2D_Cross(v1, v12)) == NVC_SIGN(float, NVC_Vec2D_Cross(v3, v31))) {
-                NVC_Draw_Pixel(oc, Vec2D(x, y), color);
-
+            int count = 0;
+            for (int sy = 0; sy < NVC_AA_RES; ++sy) {
+                float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
+                for (int sx = 0; sx < NVC_AA_RES; ++sx) {
+                    float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
+                    if (NVC_IS_IN_TRIANGLE(Vec2D(ax, ay), p1, p2, p3)) {
+                        count += 1;
+                    }
+                }
+            }
+            if (count > 0) {
+                uint32_t pixel_color = color;
+                Transparent_Color(&pixel_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
+                NVC_Draw_Pixel(oc, Vec2D(x, y), pixel_color);
             }
         }
     }
@@ -528,7 +537,7 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
         return;
     }
 
-    Vec2D dir = NVC_Vec2D_Subtract(p2, p1);
+    Vec2D dir = NVC_Vec2D_Minus(p2, p1);
     float len = NVC_Vec2D_Length(dir);
     // if (len < 0.001f) return;
 
@@ -536,15 +545,22 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
     Vec2D n = { -u.y, u.x };
 
     Vec2D offset = Vec2D(n.x * thick * 0.5f, n.y * thick * 0.5f);
-    Vec2D A = NVC_Vec2D_Add(p1, offset);
-    Vec2D B = NVC_Vec2D_Subtract(p1, offset);
-    Vec2D C = NVC_Vec2D_Add(p2, offset);
-    Vec2D D = NVC_Vec2D_Subtract(p2, offset);
+    Vec2D A = NVC_Vec2D_Plus(p1, offset);
+    Vec2D B = NVC_Vec2D_Minus(p1, offset);
+    Vec2D C = NVC_Vec2D_Plus(p2, offset);
+    Vec2D D = NVC_Vec2D_Minus(p2, offset);
 
     NVC_Fill_Triangle(oc, A, B, D, color);
     NVC_Fill_Triangle(oc, A, C, D, color);
+    NVC_Draw_Line(oc, A, D, color);
 }
 
+NEOVINCDEF void NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, float thick, uint32_t color)
+{
+    NVC_Draw_Line_Ex(oc, p1, p2, thick, color);
+    NVC_Draw_Line_Ex(oc, p2, p3, thick, color);
+    NVC_Draw_Line_Ex(oc, p3, p1, thick, color);
+}
 
 #endif // NEOVIN_C_
 
