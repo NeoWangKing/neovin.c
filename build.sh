@@ -2,20 +2,39 @@
 
 set -xe
 
+CFLAGS="-O3 -Wall -Wextra"
+LIBS="-lm"
+
 mkdir -p ./bin/
-gcc -O3 -Wall -Wextra -o ./bin/example example.c -lm
-
+gcc $CFLAGS -o ./bin/example example.c $LIBS -lm
 ./bin/example
-# clang -Wall -Wextra --target=wasm32 -o ./Web/bin/wasm.o -c ./Web/wasm.c
-# wasm-ld -m wasm32 --no-entry --export-all --allow-undefined -o ./Web/bin/wasm.wasm ./Web/bin/wasm.o
 
-# CURDIR=$(pwd)
-# cd "$HOME/emsdk"
-# . ./emsdk_env.sh
-# cd "$CURDIR"
-#
-# emcc ./Web/wasm.c -o ./Web/bin/wasm.wasm \
-#     -s STANDALONE_WASM=1 \
-#     -s EXPORTED_FUNCTIONS='["_render","_get_angle"]' \
-#     --no-entry \
-#     -lm
+source ~/opt/raylib.env
+gcc $CFLAGS `pkg-config --cflags raylib` -o ./bin/triangle triangle.c $LIBS `pkg-config --libs raylib` -lm\
+    -framework CoreFoundation \
+    -framework CoreGraphics \
+    -framework CoreVideo \
+    -framework IOKit \
+    -framework Cocoa \
+    -framework OpenGL
+# gcc $CFLAGS `pkg-config --cflags raylib` -o ./bin/3d 3d.c $LIBS `pkg-config --libs raylib` -lm\
+#     -framework CoreFoundation \
+#     -framework CoreGraphics \
+#     -framework CoreVideo \
+#     -framework IOKit \
+#     -framework Cocoa \
+#     -framework OpenGL
+
+# clang -Wall -Wextra --target=wasm32 -o ./Web/bin/3d.o -c 3d.c
+# wasm-ld -m wasm32 --no-entry --export-all --allow-undefined -o ./Web/bin/3d.wasm ./Web/bin/3d.o
+
+CURDIR=$(pwd)
+cd "$HOME/emsdk"
+. ./emsdk_env.sh
+cd "$CURDIR"
+
+emcc 3d.c -o ./bin/3d.wasm \
+    -s STANDALONE_WASM=1 \
+    -s EXPORTED_FUNCTIONS='["_render","_get_angle"]' \
+    --no-entry \
+    -lm

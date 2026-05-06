@@ -199,7 +199,7 @@ bool triangles_example(const char *file_path)
                         Vec2D(x*CELL_WIDTH + (float)CELL_WIDTH/2, y*CELL_HEIGHT),
                         Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
                         Vec2D(x*CELL_WIDTH + CELL_WIDTH, y*CELL_HEIGHT + CELL_HEIGHT),
-                        2,
+                        1,
                         FOREGROUND_COLOR);
             }
         }

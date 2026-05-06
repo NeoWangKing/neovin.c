@@ -1,6 +1,7 @@
-#define NEOVIN_C_IMPLEMENTATION
-#include "../neovin.c"
+#include "neovin.c"
 #include <stdint.h>
+
+#define RAYLIB_PLATFORM
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -13,7 +14,7 @@
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
 
-NVC_Canvas oc;
+static uint32_t pixels[WIDTH*HEIGHT];
 float angle = 0.f;
 
 float get_angle() {
@@ -48,14 +49,9 @@ void rotate_point(Vec2D *p, Vec2D p0, float angle)
 
 uint32_t *render(float dt)
 {
-    static uint32_t data[WIDTH*HEIGHT];
+    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT);
 
-    angle += 2*M_PI*dt;
-
-    oc.width = WIDTH;
-    oc.height = HEIGHT;
-    oc.stride = WIDTH;
-    oc.pixels = data;
+    angle += M_PI*dt;
 
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
@@ -71,5 +67,54 @@ uint32_t *render(float dt)
     Vec2D p4 = { 400, 300 };
     NVC_Fill_Circle(oc, p4, 200, 0x66AA2020);
 
-    return data;
+    return pixels;
 }
+
+#ifdef RAYLIB_PLATFORM
+#include <stdio.h>
+#include <raylib.h>
+
+int main(void)
+{
+    // ---- 初始化窗口 ----
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(WIDTH, HEIGHT, "triangle");
+    SetTargetFPS(60);
+
+    // ---- 准备画布首帧数据 ----
+    render(0.0f);  // 填充 oc.pixels
+
+    // ---- 创建纹理（从首帧内存数据）----
+    Image Frame = {
+        .data = pixels,
+        .width = WIDTH,
+        .height = HEIGHT,
+        .mipmaps = 1,
+        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+    };
+    Texture2D tex = LoadTextureFromImage(Frame);
+    SetTextureFilter(tex, TEXTURE_FILTER_BILINEAR);
+
+    // ---- 主循环 ----
+    while (!WindowShouldClose()) {
+        float dt = GetFrameTime();
+
+        // 1. 用 NeoVinC 绘制新一帧到内存
+        render(dt);
+
+        // 2. 上传内存像素到 GPU 纹理
+        UpdateTexture(tex, pixels);
+
+        // 3. 渲染纹理到窗口
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawTexture(tex, 0, 0, WHITE);
+        EndDrawing();
+    }
+
+    // ---- 清理 ----
+    UnloadTexture(tex);
+    CloseWindow();
+    return 0;
+}
+#endif
