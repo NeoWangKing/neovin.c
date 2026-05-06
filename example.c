@@ -63,10 +63,8 @@ defer:
     return result;
 }
 
-bool blank_example(const char *file_path) {
-    // 0xAABBGGRR
-    NVC_Fill_Background(oc, BACKGROUND_COLOR);
-
+bool save_as_png(const char *file_path)
+{
     if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
         fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
         return false;
@@ -74,6 +72,14 @@ bool blank_example(const char *file_path) {
 
     printf("INFO: save file %s\n", file_path);
     return true;
+}
+
+bool blank_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    return save_as_png(file_path);
 }
 
 bool rectangles_example(const char *file_path)
@@ -99,13 +105,7 @@ bool rectangles_example(const char *file_path)
 
     }
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
-    }
-
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 bool circles_example(const char *file_path)
@@ -146,13 +146,7 @@ bool circles_example(const char *file_path)
         }
     }
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
-    }
-
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 bool lines_example(const char *file_path)
@@ -172,13 +166,7 @@ bool lines_example(const char *file_path)
     NVC_Draw_Line_Ex(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 6, 0xFFFFFF00);
     NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 6, 0xFFFFFF00);
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
-    }
-
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 bool triangles_example(const char *file_path)
@@ -206,13 +194,7 @@ bool triangles_example(const char *file_path)
 
     }
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
-    }
-
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 bool alpha_blending_example(const char *file_path)
@@ -225,13 +207,7 @@ bool alpha_blending_example(const char *file_path)
     NVC_Fill_Rectangle(oc, Vec2D((float)WIDTH, (float)HEIGHT), Vec2D((float)-WIDTH*2/3, (float)-HEIGHT*2/3), 0x22FF0000);
 
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
-    }
-
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 bool subcanvas_example(const char *file_path)
@@ -246,13 +222,66 @@ bool subcanvas_example(const char *file_path)
     NVC_Fill_Background(sub_oc, 0xFF5050FF);
     NVC_Fill_Rectangle(sub_oc, Vec2D(0, 0), Vec2D((float)WIDTH/4, (float)HEIGHT/3), 0xFF2020AA);
 
-    if (!stbi_write_png(file_path, oc.width, oc.height, 4, oc.pixels, oc.width*sizeof(uint32_t))) {
-        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
-        return false;
+    return save_as_png(file_path);
+}
+
+bool render_3d_example(const char *file_path)
+{
+
+    float PI = 3.14159265358979323846;
+    float angle = PI / 6;
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    int GRID_COUNT = 10;
+    float GRID_PAD = 1.f/GRID_COUNT;
+    float GRID_SIZE = ((GRID_COUNT - 1)*GRID_PAD);
+    float FOV = 1;
+
+    uint32_t color = 0xFF2020AA;
+    uint32_t tmp_color = color;
+
+    // 修正：使用复合字面量，确保 z 被初始化
+    Vec3D p0 = { 0.0f, 0.0f, FOV + (float)GRID_SIZE*sqrtf(2.0f)/2 };
+    Vec3D axis_x = { 1.0f, 0.0f, 0.0f };
+    Vec3D axis_y = { 0.0f, 1.0f, 0.0f };
+    Vec3D axis_z = { 0.0f, 0.0f, 1.0f };
+
+    for (int cz = GRID_COUNT - 1; cz >= 0; --cz) {
+        for (int cy = 0; cy < GRID_COUNT; ++cy) {
+            for (int cx = 0; cx < GRID_COUNT; ++cx) {
+                uint8_t r = 255*(float)cx/(GRID_COUNT - 1);
+                uint8_t g = 255*(float)cy/(GRID_COUNT - 1);
+                uint8_t b = 255*(float)cz/(GRID_COUNT - 1);
+                float x = p0.x - (float)GRID_SIZE/2 + cx * GRID_PAD;
+                float y = p0.y - (float)GRID_SIZE/2 + cy * GRID_PAD;
+                float z = p0.z - (float)GRID_SIZE/2 + cz * GRID_PAD;
+                
+                Vec3D p = { x, y, z };
+                Rotate_Point(&p, p0, axis_y, angle);
+                Rotate_Point(&p, p0, axis_x, angle);
+                Rotate_Point(&p, p0, axis_z, angle);
+
+                uint8_t comp[COUNT_COMP];
+                comp[COMP_RED] = r;
+                comp[COMP_GREEN] = g;
+                comp[COMP_BLUE] = b;
+                comp[COMP_ALPHA] = 255;
+                tmp_color = Pack_RGBA32(comp);
+                NVC_Bright_Color(&tmp_color, 1.5);
+
+                // 防止 z 变负或为零
+                if (p.z <= 0.0f) continue;
+                if (p.z <= FOV) Transparent_Color(&tmp_color, p.z/FOV);
+                if (p.z > FOV) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
+                if (p.z > FOV) Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
+
+                NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z + (float)WIDTH/2, p.y/2*HEIGHT/p.z + (float)HEIGHT/2), 5.0f*FOV / p.z, tmp_color);
+            }
+        }
     }
 
-    printf("INFO: save file %s\n", file_path);
-    return true;
+    return save_as_png(file_path);
 }
 
 int main(void)
@@ -269,5 +298,6 @@ int main(void)
     if (!triangles_example("examples/triangles.png")) return -1;
     if (!alpha_blending_example("examples/alpha_blending.png")) return -1;
     if (!subcanvas_example("examples/subcanvas.png")) return -1;
+    if (!render_3d_example("examples/3d.png")) return -1;
     return 0;
 }

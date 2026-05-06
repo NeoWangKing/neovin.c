@@ -68,6 +68,43 @@ NEOVINCDEF Vec2D Vec3D_2_Vec2D(Vec3D p_3D, float FOV)
     return Vec2D(p_3D.x*FOV/(p_3D.z), p_3D.y*FOV/(p_3D.z));
 }
 
+NEOVINCDEF void Rotate_Point(Vec3D *p, Vec3D p0, Vec3D dir, float angle) {
+    // 1. 计算相对向量
+    float vx = p->x - p0.x;
+    float vy = p->y - p0.y;
+    float vz = p->z - p0.z;
+
+    // 2. 归一化旋转轴
+    float len_dir = sqrtf(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+    if (len_dir < 0.0001f) return; // 轴退化，无法旋转
+    float ux = dir.x / len_dir;
+    float uy = dir.y / len_dir;
+    float uz = dir.z / len_dir;
+
+    // 3. 罗德里格斯旋转公式
+    float cos_a = cosf(angle);
+    float sin_a = sinf(angle);
+    float one_minus_cos = 1.0f - cos_a;
+
+    // 叉积 u × v
+    float cx = uy * vz - uz * vy;
+    float cy = uz * vx - ux * vz;
+    float cz = ux * vy - uy * vx;
+
+    // 点积 u · v
+    float dot = ux * vx + uy * vy + uz * vz;
+
+    // 组合三项
+    float rx = vx * cos_a + cx * sin_a + ux * dot * one_minus_cos;
+    float ry = vy * cos_a + cy * sin_a + uy * dot * one_minus_cos;
+    float rz = vz * cos_a + cz * sin_a + uz * dot * one_minus_cos;
+
+    // 4. 平移回原始参考点
+    p->x = p0.x + rx;
+    p->y = p0.y + ry;
+    p->z = p0.z + rz;
+}
+
 NEOVINCDEF bool NVC_Is_In_CV(NVC_Canvas oc, Vec2D p)
 {
     float ax = p.x+NVC_CV_OX;
@@ -683,3 +720,8 @@ NEOVINCDEF void NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, f
 }
 
 #endif // NEOVIN_C_
+
+// TODO: Text Displaying
+// TODO: Font loading
+// TODO: Texture loading
+// TODO: 3D Drawing
