@@ -89,20 +89,22 @@ bool rectangles_example(const char *file_path)
 
     for (int y = 0; y < ROWS; ++y) {
         for (int x = 0; x < COLS; ++x) {
+            float u = (float)x / COLS;
+            float v = (float)y / ROWS;
+            float t = (u + v)/2;
             if ((x+y)%2) {
                 NVC_Fill_Rectangle(oc,
-                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
-                        Vec2D(CELL_WIDTH, CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH+(float)CELL_WIDTH/2-(float)CELL_WIDTH*t/2, y*CELL_HEIGHT+(float)CELL_HEIGHT/2-(float)CELL_HEIGHT*t/2),
+                        Vec2D(CELL_WIDTH*t, CELL_HEIGHT*t),
                         0xCC2020FF);
             } else {
                 NVC_Draw_Rectangle(oc,
-                        Vec2D(x*CELL_WIDTH, y*CELL_HEIGHT),
-                        Vec2D(CELL_WIDTH, CELL_HEIGHT),
+                        Vec2D(x*CELL_WIDTH+(float)CELL_WIDTH/2-(float)CELL_WIDTH*t/2, y*CELL_HEIGHT+(float)CELL_HEIGHT/2-(float)CELL_HEIGHT*t/2),
+                        Vec2D(CELL_WIDTH*t, CELL_HEIGHT*t),
                         4,
                         0xCC20AA20);
             }
         }
-
     }
 
     return save_as_png(file_path);
@@ -129,7 +131,7 @@ bool circles_example(const char *file_path)
 
             float radius = CELL_WIDTH;
             uint32_t color = 0xFF5050FF;
-            Transparent_Color(&color, t);
+            NVC_Transparent_Color(&color, t);
             if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
             if ((x+y)%2) {
                 NVC_Fill_Circle(oc,
@@ -191,7 +193,6 @@ bool triangles_example(const char *file_path)
                         FOREGROUND_COLOR);
             }
         }
-
     }
 
     return save_as_png(file_path);
@@ -205,7 +206,6 @@ bool alpha_blending_example(const char *file_path)
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
     NVC_Fill_Rectangle(oc, Vec2D(0, 0), Vec2D((float)WIDTH*2/3, (float)HEIGHT*2/3), 0x880000FF);
     NVC_Fill_Rectangle(oc, Vec2D((float)WIDTH, (float)HEIGHT), Vec2D((float)-WIDTH*2/3, (float)-HEIGHT*2/3), 0x22FF0000);
-
 
     return save_as_png(file_path);
 }
@@ -227,9 +227,9 @@ bool subcanvas_example(const char *file_path)
 
 bool render_3d_example(const char *file_path)
 {
-
     float PI = 3.14159265358979323846;
     float angle = PI / 6;
+
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
@@ -258,28 +258,43 @@ bool render_3d_example(const char *file_path)
                 float z = p0.z - (float)GRID_SIZE/2 + cz * GRID_PAD;
                 
                 Vec3D p = { x, y, z };
-                Rotate_Point(&p, p0, axis_y, angle);
-                Rotate_Point(&p, p0, axis_x, angle);
-                Rotate_Point(&p, p0, axis_z, angle);
+                NVC_Rotate_Point(&p, p0, axis_y, angle);
+                NVC_Rotate_Point(&p, p0, axis_x, angle);
+                NVC_Rotate_Point(&p, p0, axis_z, angle);
 
                 uint8_t comp[COUNT_COMP];
                 comp[COMP_RED] = r;
                 comp[COMP_GREEN] = g;
                 comp[COMP_BLUE] = b;
                 comp[COMP_ALPHA] = 255;
-                tmp_color = Pack_RGBA32(comp);
+                tmp_color = NVC_Pack_RGBA32(comp);
                 NVC_Bright_Color(&tmp_color, 1.5);
 
                 // 防止 z 变负或为零
                 if (p.z <= 0.0f) continue;
-                if (p.z <= FOV) Transparent_Color(&tmp_color, p.z/FOV);
+                if (p.z <= FOV) NVC_Transparent_Color(&tmp_color, p.z/FOV);
                 if (p.z > FOV) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
-                if (p.z > FOV) Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
+                if (p.z > FOV) NVC_Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
 
                 NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z + (float)WIDTH/2, p.y/2*HEIGHT/p.z + (float)HEIGHT/2), 5.0f*FOV / p.z, tmp_color);
             }
         }
     }
+
+    return save_as_png(file_path);
+}
+
+bool text_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    float font_size = 25;
+    float line_pad = 5;
+    NVC_Text(oc, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", Vec2D(0, 0), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "abcdefghijklmnopqrstuvwxyz", Vec2D(0, font_size + line_pad), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "1234567890 !\"#$%&'()*+,-./", Vec2D(0, 2*(font_size + line_pad)), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, ":;<=>?@[\\]^_`{|}~", Vec2D(0, 3*(font_size + line_pad)), default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -299,5 +314,7 @@ int main(void)
     if (!alpha_blending_example("examples/alpha_blending.png")) return -1;
     if (!subcanvas_example("examples/subcanvas.png")) return -1;
     if (!render_3d_example("examples/3d.png")) return -1;
+    if (!text_example("examples/text.png")) return -1;
+
     return 0;
 }

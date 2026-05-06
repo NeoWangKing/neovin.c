@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// #define RAYLIB_PLATFORM
+#define RAYLIB_PLATFORM
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -103,19 +103,22 @@ uint32_t *render(float dt)
                 comp[COMP_GREEN] = g;
                 comp[COMP_BLUE] = b;
                 comp[COMP_ALPHA] = 255;
-                tmp_color = Pack_RGBA32(comp);
+                tmp_color = NVC_Pack_RGBA32(comp);
                 NVC_Bright_Color(&tmp_color, 1.5);
 
                 // 防止 z 变负或为零
                 if (p.z <= 0.0f) continue;
-                if (p.z <= FOV) Transparent_Color(&tmp_color, p.z/FOV);
+                if (p.z <= FOV) NVC_Transparent_Color(&tmp_color, p.z/FOV);
                 if (p.z > FOV) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
-                if (p.z > FOV) Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
+                if (p.z > FOV) NVC_Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
 
                 NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z, p.y/2*HEIGHT/p.z), 5.0f*FOV / p.z, tmp_color);
+
             }
         }
     }
+    float font_size = 24;
+    NVC_Text(oc, "3d Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), default_font, font_size, 0xFFFFFFFF);
     return pixels;
 }
 
