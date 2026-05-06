@@ -79,6 +79,9 @@ bool blank_example(const char *file_path)
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
+    float font_size = 24;
+    NVC_Text(oc, "Blank E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+
     return save_as_png(file_path);
 }
 
@@ -106,6 +109,9 @@ bool rectangles_example(const char *file_path)
             }
         }
     }
+
+    float font_size = 24;
+    NVC_Text(oc, "Rectangles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -148,6 +154,9 @@ bool circles_example(const char *file_path)
         }
     }
 
+    float font_size = 24;
+    NVC_Text(oc, "Circles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+
     return save_as_png(file_path);
 }
 
@@ -167,6 +176,9 @@ bool lines_example(const char *file_path)
 
     NVC_Draw_Line_Ex(oc, Vec2D(0, (float)HEIGHT/2), Vec2D(WIDTH, (float)HEIGHT/2), 6, 0xFFFFFF00);
     NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 6, 0xFFFFFF00);
+
+    float font_size = 24;
+    NVC_Text(oc, "Lines E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -195,6 +207,9 @@ bool triangles_example(const char *file_path)
         }
     }
 
+    float font_size = 24;
+    NVC_Text(oc, "Triangles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+
     return save_as_png(file_path);
 }
 
@@ -206,6 +221,9 @@ bool alpha_blending_example(const char *file_path)
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
     NVC_Fill_Rectangle(oc, Vec2D(0, 0), Vec2D((float)WIDTH*2/3, (float)HEIGHT*2/3), 0x880000FF);
     NVC_Fill_Rectangle(oc, Vec2D((float)WIDTH, (float)HEIGHT), Vec2D((float)-WIDTH*2/3, (float)-HEIGHT*2/3), 0x22FF0000);
+
+    float font_size = 24;
+    NVC_Text(oc, "Color Blending E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -221,6 +239,9 @@ bool subcanvas_example(const char *file_path)
 
     NVC_Fill_Background(sub_oc, 0xFF5050FF);
     NVC_Fill_Rectangle(sub_oc, Vec2D(0, 0), Vec2D((float)WIDTH/4, (float)HEIGHT/3), 0xFF2020AA);
+
+    float font_size = 24;
+    NVC_Text(oc, "Subcanvas E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
