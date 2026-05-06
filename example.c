@@ -281,6 +281,9 @@ bool render_3d_example(const char *file_path)
         }
     }
 
+    float font_size = 24;
+    NVC_Text(oc, "3d Rendering E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+
     return save_as_png(file_path);
 }
 
