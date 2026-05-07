@@ -1718,7 +1718,6 @@ NEOVINCDEF void NVC_Text(NVC_Canvas oc, const char *text, Vec2D tp, NVC_Font fon
 
 #endif // NEOVIN_C_
 
-// TODO: Text Displaying
 // TODO: Font loading
 // TODO: Texture loading
 // TODO: 3D Drawing
