@@ -8,6 +8,8 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "./thirdparty/stb_image_write.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "./thirdparty/stb_image.h"
 
 #define NEOVIN_C_IMPLEMENTATION
 #include "neovin.c"
@@ -323,6 +325,38 @@ bool text_example(const char *file_path)
     return save_as_png(file_path);
 }
 
+bool texture_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    const char *png_file_path = "NeoWangKing.png";
+    int tw, th;
+    uint32_t *texture;
+    texture = (uint32_t*) stbi_load(png_file_path, &tw, &th, NULL, 4);
+    if (texture == NULL) {
+        fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
+    }
+
+    float angle = 1.3f;
+    float w = (float)tw/(1+0.5*sinf(angle));
+    float h = (float)th*(1+0.5*sinf(angle));
+    NVC_Canvas sub_oc;
+    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH/4-w/2, (float)HEIGHT/2-h/2), Vec2D(w, h));
+    NVC_Copy(sub_oc, NVC_CANVAS(texture, tw, th));
+
+    angle = 4.5f;
+    w = (float)tw/(1+0.5*sinf(angle));
+    h = (float)th*(1+0.5*sinf(angle));
+    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH*3/4-w/2, (float)HEIGHT/2-h/2), Vec2D(w, h));
+    NVC_Copy(sub_oc, NVC_CANVAS(texture, tw, th));
+
+    float font_size = 24;
+    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), default_font, font_size, 0xFFFFFFFF);
+
+    return save_as_png(file_path);
+}
+
 int main(void)
 {
     oc.width = WIDTH;
@@ -330,15 +364,16 @@ int main(void)
     oc.stride = WIDTH;
     oc.pixels = (uint32_t*)malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
 
-    if (!blank_example("examples/blank.png")) return -1;
-    if (!rectangles_example("examples/rectangles.png")) return -1;
-    if (!circles_example("examples/circles.png")) return -1;
-    if (!lines_example("examples/lines.png")) return -1;
-    if (!triangles_example("examples/triangles.png")) return -1;
-    if (!alpha_blending_example("examples/alpha_blending.png")) return -1;
-    if (!subcanvas_example("examples/subcanvas.png")) return -1;
-    if (!render_3d_example("examples/3d.png")) return -1;
-    if (!text_example("examples/text.png")) return -1;
+    if (!blank_example("tests/blank.png")) return -1;
+    if (!rectangles_example("tests/rectangles.png")) return -1;
+    if (!circles_example("tests/circles.png")) return -1;
+    if (!lines_example("tests/lines.png")) return -1;
+    if (!triangles_example("tests/triangles.png")) return -1;
+    if (!alpha_blending_example("tests/alpha_blending.png")) return -1;
+    if (!subcanvas_example("tests/subcanvas.png")) return -1;
+    if (!render_3d_example("tests/3d.png")) return -1;
+    if (!text_example("tests/text.png")) return -1;
+    if (!texture_example("tests/texture.png")) return -1;
 
     return 0;
 }

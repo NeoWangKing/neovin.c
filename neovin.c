@@ -1,12 +1,12 @@
 #ifndef NEOVIN_C_
 #define NEOVIN_C_
 
+#include <math.h>
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
-#include <stdbool.h>
 #include <string.h>
+#include <stdbool.h>
 
 #ifndef NEOVINCDEF
 #define NEOVINCDEF static inline
@@ -1005,6 +1005,7 @@ typedef struct {
 
 #define NVC_CANVAS_NULL ((NVC_Canvas) {0})
 #define NVC_PIXEL(oc, x, y) (oc).pixels[((int)(y)+NVC_CV_OY)*(oc).stride + (int)(x) + NVC_CV_OX]
+#define NVC_CANVAS(data, w, h) (NVC_Canvas) { .height = (h), .width = (w), .stride = (w), .pixels = (data) }
 
 NEOVINCDEF NVC_Canvas NVC_Make_Canvas(uint32_t *pixels, int width, int height)
 {
@@ -1716,8 +1717,19 @@ NEOVINCDEF void NVC_Text(NVC_Canvas oc, const char *text, Vec2D tp, NVC_Font fon
     }
 }
 
+NEOVINCDEF void NVC_Copy(NVC_Canvas dst, NVC_Canvas src)
+{
+    for (int y = 0; y < dst.height; ++y) {
+        for (int x = 0; x < dst.width; ++x) {
+            int ax = src.width*x/dst.width;
+            int ay = src.height*y/dst.height;
+            NVC_PIXEL(dst, x, y) = NVC_PIXEL(src, ax, ay);
+        }
+    }
+}
+
 #endif // NEOVIN_C_
 
-// TODO: Font loading
-// TODO: Texture loading
+// TODO: Font loadingp
+// TODO: Texture loadingp
 // TODO: 3D Drawing

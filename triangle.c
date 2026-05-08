@@ -1,10 +1,11 @@
-#include "neovin.c"
 #include <stdint.h>
 
-#define RAYLIB_PLATFORM
+#define WASM_PLATFORM 0
+#define RAYLIB_PLATFORM 1
 
 #define WIDTH 800
 #define HEIGHT 600
+#include "neovin.c"
 
 #define ROWS 6
 #define COLS 8
@@ -70,7 +71,7 @@ uint32_t *render(float dt)
     return pixels;
 }
 
-#ifdef RAYLIB_PLATFORM
+#if PLATFORM == RAYLIB_PLATFORM
 #include <stdio.h>
 #include <raylib.h>
 
@@ -117,4 +118,8 @@ int main(void)
     CloseWindow();
     return 0;
 }
-#endif
+#elif PLATFORM == WASM_PLATFORM
+// Do nothing
+#else
+#error "Unknown platform"
+#endif // PLATFORM
