@@ -14,8 +14,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #endif
 
-#include "../thirdparty/stb_image_write.h"
-#include "../thirdparty/stb_image.h"
+#include "thirdparty/stb_image_write.h"
+#include "thirdparty/stb_image.h"
 
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
