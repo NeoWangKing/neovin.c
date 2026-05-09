@@ -11,15 +11,17 @@ $ ./example
 
 ## Gallery
 
-![rectangle](./examples/rectangles.png)
+![rectangle](./tests/rectangles.png)
 
-![circle](./examples/circles.png)
+![circle](./tests/circles.png)
 
-![lines](./examples/lines.png)
+![lines](./tests/lines.png)
 
-![triangles](./examples/triangles.png)
+![triangles](./tests/triangles.png)
 
-![alpha-blending](./examples/alpha_blending.png)
+![alpha-blending](./tests/alpha_blending.png)
 
-![3d](./examples/3d.png)
+![3d](./tests/3d.png)
 
+## License
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
