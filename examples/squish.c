@@ -9,13 +9,16 @@
 #define HEIGHT 600
 #include "neovin.c"
 
-#if PLATFORM != RAYLIB_PLATFORM
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif
+// #if PLATFORM != RAYLIB_PLATFORM
+// #define STB_IMAGE_WRITE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
+// #endif
+//
+// #include "thirdparty/stb_image_write.h"
+// #include "thirdparty/stb_image.h"
 
-#include "thirdparty/stb_image_write.h"
-#include "thirdparty/stb_image.h"
+#include "neowang.c"
+#include "amiya.c"
 
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
@@ -35,24 +38,30 @@ uint32_t *render(float dt)
     static uint32_t pixels[WIDTH*HEIGHT];
     angle += 4 * M_PI * dt;
 
-    const char *png_file_path = "NeoWangKing.png";
+    // const char *png_file_path = "NeoWangKing.png";
+    // NVC_Texture texture;
+    // texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
+    // if (texture.data == NULL) {
+    //     fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
+    // }
+    
     NVC_Texture texture;
-    texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
-    if (texture.data == NULL) {
-        fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
-    }
+    texture.data = amiya_data;
+    texture.width = amiya_width;
+    texture.height = amiya_height;
+
 
     NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    float w = (float)texture.width/(1+0.5*sinf(angle));
-    float h = (float)texture.height*(1+0.5*sinf(angle));
+    float w = (float)texture.width/(1+0.2*sinf(angle));
+    float h = (float)texture.height*(1+0.2*sinf(angle));
     float x = (float)WIDTH/2 - w/2;
     float y = (float)HEIGHT/2 - h/2;
     NVC_Draw_Texture(oc, texture, Vec2D(x, y), Vec2D(w, h));
 
     float font_size = 24;
-    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), NVC_default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
     return pixels;
 }
 

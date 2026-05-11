@@ -17,7 +17,7 @@ function make_environment(...envs) {
   });
 }
 
-WebAssembly.instantiateStreaming(fetch('./bin/3d.wasm'), {
+WebAssembly.instantiateStreaming(fetch('./bin/squish.wasm'), {
   "env": make_environment({
 
   })
