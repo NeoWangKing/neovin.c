@@ -82,7 +82,7 @@ bool blank_example(const char *file_path)
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     float font_size = 24;
-    NVC_Text(oc, "Blank E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Blank E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -113,7 +113,7 @@ bool rectangles_example(const char *file_path)
     }
 
     float font_size = 24;
-    NVC_Text(oc, "Rectangles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Rectangles E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -157,7 +157,7 @@ bool circles_example(const char *file_path)
     }
 
     float font_size = 24;
-    NVC_Text(oc, "Circles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Circles E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -180,7 +180,7 @@ bool lines_example(const char *file_path)
     NVC_Draw_Line_Ex(oc, Vec2D((float)WIDTH/2, 0), Vec2D((float)WIDTH/2, HEIGHT), 6, 0xFFFFFF00);
 
     float font_size = 24;
-    NVC_Text(oc, "Lines E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Lines E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -210,7 +210,7 @@ bool triangles_example(const char *file_path)
     }
 
     float font_size = 24;
-    NVC_Text(oc, "Triangles E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Triangles E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -225,7 +225,7 @@ bool alpha_blending_example(const char *file_path)
     NVC_Fill_Rectangle(oc, Vec2D((float)WIDTH, (float)HEIGHT), Vec2D((float)-WIDTH*2/3, (float)-HEIGHT*2/3), 0x22FF0000);
 
     float font_size = 24;
-    NVC_Text(oc, "Color Blending E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Color Blending E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -237,13 +237,13 @@ bool subcanvas_example(const char *file_path)
 
     NVC_Canvas sub_oc;
 
-    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH/4, (float)HEIGHT/4), Vec2D((float)WIDTH/2, (float)HEIGHT/2));
+    sub_oc = NVC_Make_SubCanvas(oc, Vec2D((float)WIDTH/4, (float)HEIGHT/4), Vec2D((float)WIDTH/2, (float)HEIGHT/2));
 
     NVC_Fill_Background(sub_oc, 0xFF5050FF);
     NVC_Fill_Rectangle(sub_oc, Vec2D(0, 0), Vec2D((float)WIDTH/4, (float)HEIGHT/3), 0xFF2020AA);
 
     float font_size = 24;
-    NVC_Text(oc, "Subcanvas E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Subcanvas E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -305,7 +305,7 @@ bool render_3d_example(const char *file_path)
     }
 
     float font_size = 24;
-    NVC_Text(oc, "3d Rendering E.X.", Vec2D(10, 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "3d Rendering E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -317,10 +317,10 @@ bool text_example(const char *file_path)
 
     float font_size = 25;
     float line_pad = 5;
-    NVC_Text(oc, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", Vec2D(0, 0), default_font, font_size, 0xFFFFFFFF);
-    NVC_Text(oc, "abcdefghijklmnopqrstuvwxyz", Vec2D(0, font_size + line_pad), default_font, font_size, 0xFFFFFFFF);
-    NVC_Text(oc, "1234567890 !\"#$%&'()*+,-./", Vec2D(0, 2*(font_size + line_pad)), default_font, font_size, 0xFFFFFFFF);
-    NVC_Text(oc, ":;<=>?@[\\]^_`{|}~", Vec2D(0, 3*(font_size + line_pad)), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", Vec2D(0, 0), NVC_default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "abcdefghijklmnopqrstuvwxyz", Vec2D(0, font_size + line_pad), NVC_default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "1234567890 !\"#$%&'()*+,-./", Vec2D(0, 2*(font_size + line_pad)), NVC_default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, ":;<=>?@[\\]^_`{|}~", Vec2D(0, 3*(font_size + line_pad)), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }
@@ -331,28 +331,28 @@ bool texture_example(const char *file_path)
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     const char *png_file_path = "NeoWangKing.png";
-    int tw, th;
-    uint32_t *texture;
-    texture = (uint32_t*) stbi_load(png_file_path, &tw, &th, NULL, 4);
-    if (texture == NULL) {
+    NVC_Texture texture;
+    texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
+    if (texture.data == NULL) {
         fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
     }
 
     float angle = 1.3f;
-    float w = (float)tw/(1+0.5*sinf(angle));
-    float h = (float)th*(1+0.5*sinf(angle));
-    NVC_Canvas sub_oc;
-    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH/4-w/2, (float)HEIGHT/2-h/2), Vec2D(w, h));
-    NVC_Copy(sub_oc, NVC_CANVAS(texture, tw, th));
+    float w = (float)texture.width/(1+0.5*sinf(angle));
+    float h = (float)texture.height*(1+0.5*sinf(angle));
+    float x = (float)WIDTH/4 - w/2;
+    float y = (float)HEIGHT/2 - h/2;
+    NVC_Draw_Texture(oc, texture, Vec2D(x, y), Vec2D(w, h));
 
     angle = 4.5f;
-    w = (float)tw/(1+0.5*sinf(angle));
-    h = (float)th*(1+0.5*sinf(angle));
-    NVC_GetSubCanvas(&sub_oc, oc, Vec2D((float)WIDTH*3/4-w/2, (float)HEIGHT/2-h/2), Vec2D(w, h));
-    NVC_Copy(sub_oc, NVC_CANVAS(texture, tw, th));
+    w = (float)texture.width/(1+0.5*sinf(angle));
+    h = (float)texture.height*(1+0.5*sinf(angle));
+    x = (float)WIDTH*3/4 - w/2;
+    y = (float)HEIGHT/2 - h/2;
+    NVC_Draw_Texture(oc, texture, Vec2D(x, y), Vec2D(w, h));
 
     float font_size = 24;
-    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), NVC_default_font, font_size, 0xFFFFFFFF);
 
     return save_as_png(file_path);
 }

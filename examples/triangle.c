@@ -50,7 +50,7 @@ void rotate_point(Vec2D *p, Vec2D p0, float angle)
 
 uint32_t *render(float dt)
 {
-    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT);
+    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
 
     angle += M_PI*dt;
 

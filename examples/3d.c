@@ -72,7 +72,7 @@ uint32_t *render(float dt)
 {
     angle += 0.5 * M_PI * dt;
 
-    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT);
+    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     uint32_t color = 0xFF2020AA;
@@ -119,7 +119,7 @@ uint32_t *render(float dt)
         }
     }
     float font_size = 24;
-    NVC_Text(oc, "3d Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "3d Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), NVC_default_font, font_size, 0xFFFFFFFF);
     return pixels;
 }
 

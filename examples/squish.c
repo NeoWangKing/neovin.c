@@ -36,24 +36,23 @@ uint32_t *render(float dt)
     angle += 4 * M_PI * dt;
 
     const char *png_file_path = "NeoWangKing.png";
-    int tw, th;
-    uint32_t *texture;
-    texture = (uint32_t*) stbi_load(png_file_path, &tw, &th, NULL, 4);
-    if (texture == NULL) {
+    NVC_Texture texture;
+    texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
+    if (texture.data == NULL) {
         fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
     }
 
-    NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT);
+    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    float w = (float)tw/(1+0.5*sinf(angle));
-    float h = (float)th*(1+0.5*sinf(angle));
-    NVC_Canvas sub_oc;
-    NVC_GetSubCanvas(&sub_oc, NVC_CANVAS(pixels, WIDTH, HEIGHT), Vec2D((float)WIDTH/2-w/2, HEIGHT-h), Vec2D(w, h));
-    NVC_Copy(sub_oc, NVC_CANVAS(texture, tw, th));
+    float w = (float)texture.width/(1+0.5*sinf(angle));
+    float h = (float)texture.height*(1+0.5*sinf(angle));
+    float x = (float)WIDTH/2 - w/2;
+    float y = (float)HEIGHT/2 - h/2;
+    NVC_Draw_Texture(oc, texture, Vec2D(x, y), Vec2D(w, h));
 
     float font_size = 24;
-    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "Texture Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), NVC_default_font, font_size, 0xFFFFFFFF);
     return pixels;
 }
 
@@ -65,15 +64,12 @@ uint32_t *render(float dt)
 
 int main(void)
 {
-    // ---- 初始化窗口 ----
-    // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(WIDTH, HEIGHT, "Texture");
     SetTargetFPS(60);
 
-    // ---- 准备画布首帧数据 ----
-    uint32_t *pixels = render(0.0f);  // 填充 oc.pixels
+    uint32_t *pixels = render(0.0f);
 
-    // ---- 创建纹理（从首帧内存数据）----
     Image Frame = {
         .data = pixels,
         .width = WIDTH,
@@ -84,7 +80,6 @@ int main(void)
     Texture2D tex = LoadTextureFromImage(Frame);
     SetTextureFilter(tex, TEXTURE_FILTER_BILINEAR);
 
-    // ---- 主循环 ----
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
@@ -100,7 +95,6 @@ int main(void)
         EndDrawing();
     }
 
-    // ---- 清理 ----
     UnloadTexture(tex);
     CloseWindow();
     return 0;
