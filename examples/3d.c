@@ -58,9 +58,9 @@ uint32_t *render(float dt)
                 float z = p0.z - (float)GRID_SIZE/2 + cz * GRID_PAD;
                 
                 Vec3D p = { x, y, z };
-                NVC_Rotate_Point(&p, p0, axis_y, angle);
-                NVC_Rotate_Point(&p, p0, axis_x, angle);
-                NVC_Rotate_Point(&p, p0, axis_z, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_y, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_x, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_z, angle);
 
                 uint8_t comp[COUNT_COMP];
                 comp[COMP_RED] = r;
@@ -193,7 +193,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
 
 void compress_pixels(uint32_t *pixels)
 {
-    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    NVC_Canvas oc = NVC_CANVAS(pixels, WIDTH, HEIGHT, WIDTH);
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,

@@ -281,9 +281,9 @@ bool render_3d_example(const char *file_path)
                 float z = p0.z - (float)GRID_SIZE/2 + cz * GRID_PAD;
                 
                 Vec3D p = { x, y, z };
-                NVC_Rotate_Point(&p, p0, axis_y, angle);
-                NVC_Rotate_Point(&p, p0, axis_x, angle);
-                NVC_Rotate_Point(&p, p0, axis_z, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_y, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_x, angle);
+                NVC_ROTATE_POINT(&p, p0, axis_z, angle);
 
                 uint8_t comp[COUNT_COMP];
                 comp[COMP_RED] = r;

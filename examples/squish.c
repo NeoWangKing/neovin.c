@@ -42,7 +42,7 @@ uint32_t *render(float dt)
     texture.height = neowang_height;
 
 
-    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    NVC_Canvas oc = NVC_CANVAS(pixels, WIDTH, HEIGHT, WIDTH);
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     float w = (float)WIDTH/(1+0.2*sinf(angle));
@@ -162,7 +162,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
 
 void compress_pixels(uint32_t *pixels)
 {
-    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    NVC_Canvas oc = NVC_CANVAS(pixels, WIDTH, HEIGHT, WIDTH);
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,

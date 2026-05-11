@@ -65,15 +65,15 @@ uint32_t *render(float dt)
 
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    Vec2D p1 = { 400, 100 };
-    Vec2D p2 = { 100, 300 };
-    Vec2D p3 = { 750, 550 };
-    Vec2D center = { (float)WIDTH/2, (float)HEIGHT/2 };
-    rotate_point(&p1, center, angle);
-    rotate_point(&p2, center, angle);
-    rotate_point(&p3, center, angle);
+    Vec3D p1 = { 400, 100, 0 };
+    Vec3D p2 = { 100, 300, 0 };
+    Vec3D p3 = { 750, 550, 0 };
+    Vec3D center = { (float)WIDTH/2, (float)HEIGHT/2, 0 };
+    NVC_ROTATE_POINT(&p1, center, Vec3D(0, 0, 1), angle);
+    NVC_ROTATE_POINT(&p2, center, Vec3D(0, 0, 1), angle);
+    NVC_ROTATE_POINT(&p3, center, Vec3D(0, 0, 1), angle);
     // NVC_Fill_Triangle(oc, p1, p2, p3, 0xFF2020AA);
-    NVC_Fill_Triangle_C3(oc, p1, p2, p3, 0xFF2020AA, 0xFF20AA20, 0xFFAA2020);
+    NVC_Fill_Triangle_C3(oc, Vec2D(p1.x, p1.y), Vec2D(p2.x, p2.y), Vec2D(p3.x, p3.y), 0xFF2020AA, 0xFF20AA20, 0xFFAA2020);
 
     float radius = 150;
     pcx += vcx*dt;
@@ -197,7 +197,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
 
 void compress_pixels(uint32_t *pixels)
 {
-    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    NVC_Canvas oc = NVC_CANVAS(pixels, WIDTH, HEIGHT, WIDTH);
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,
