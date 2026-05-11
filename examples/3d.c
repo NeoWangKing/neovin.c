@@ -9,9 +9,6 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-#define NVC_CV_OX (int)(WIDTH/2)
-#define NVC_CV_OY (int)(HEIGHT/2)
-#define NVC_3D_IMPLEMENTATION
 #include "neovin.c"
 
 #define BACKGROUND_COLOR 0xFF181818
@@ -28,44 +25,6 @@ float get_angle() {
 #define M_PI 3.14159265358979323846
 #endif
 
-// 假设 Vec3D 已定义，且 math.h 已包含
-NEOVINCDEF void rotate_point(Vec3D *p, Vec3D p0, Vec3D dir, float angle) {
-    // 1. 计算相对向量
-    float vx = p->x - p0.x;
-    float vy = p->y - p0.y;
-    float vz = p->z - p0.z;
-
-    // 2. 归一化旋转轴
-    float len_dir = sqrtf(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-    if (len_dir < 0.0001f) return; // 轴退化，无法旋转
-    float ux = dir.x / len_dir;
-    float uy = dir.y / len_dir;
-    float uz = dir.z / len_dir;
-
-    // 3. 罗德里格斯旋转公式
-    float cos_a = cosf(angle);
-    float sin_a = sinf(angle);
-    float one_minus_cos = 1.0f - cos_a;
-
-    // 叉积 u × v
-    float cx = uy * vz - uz * vy;
-    float cy = uz * vx - ux * vz;
-    float cz = ux * vy - uy * vx;
-
-    // 点积 u · v
-    float dot = ux * vx + uy * vy + uz * vz;
-
-    // 组合三项
-    float rx = vx * cos_a + cx * sin_a + ux * dot * one_minus_cos;
-    float ry = vy * cos_a + cy * sin_a + uy * dot * one_minus_cos;
-    float rz = vz * cos_a + cz * sin_a + uz * dot * one_minus_cos;
-
-    // 4. 平移回原始参考点
-    p->x = p0.x + rx;
-    p->y = p0.y + ry;
-    p->z = p0.z + rz;
-}
-
 #define GRID_COUNT 10
 #define GRID_PAD 1.f/GRID_COUNT
 #define GRID_SIZE ((GRID_COUNT - 1)*GRID_PAD)
@@ -76,6 +35,7 @@ uint32_t *render(float dt)
     angle += 0.5 * M_PI * dt;
 
     NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
     uint32_t color = 0xFF2020AA;
@@ -98,9 +58,9 @@ uint32_t *render(float dt)
                 float z = p0.z - (float)GRID_SIZE/2 + cz * GRID_PAD;
                 
                 Vec3D p = { x, y, z };
-                rotate_point(&p, p0, axis_y, angle);
-                rotate_point(&p, p0, axis_z, angle);
-                rotate_point(&p, p0, axis_x, angle);
+                NVC_Rotate_Point(&p, p0, axis_y, angle);
+                NVC_Rotate_Point(&p, p0, axis_x, angle);
+                NVC_Rotate_Point(&p, p0, axis_z, angle);
 
                 uint8_t comp[COUNT_COMP];
                 comp[COMP_RED] = r;
@@ -116,13 +76,13 @@ uint32_t *render(float dt)
                 if (p.z > FOV) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
                 if (p.z > FOV) NVC_Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
 
-                NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z, p.y/2*HEIGHT/p.z), 5.0f*FOV / p.z, tmp_color);
-
+                NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z + (float)WIDTH/2, p.y/2*HEIGHT/p.z + (float)HEIGHT/2), 5.0f*FOV / p.z, tmp_color);
             }
         }
     }
+
     float font_size = 24;
-    NVC_Text(oc, "3d Rendering E.X.", Vec2D(-(float)WIDTH/2 + 10, -(float)HEIGHT/2 + 10), NVC_default_font, font_size, 0xFFFFFFFF);
+    NVC_Text(oc, "3d Rendering E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
     return pixels;
 }
 
@@ -191,28 +151,31 @@ char char_canvas[SCALED_DOWN_WIDTH*SCALED_DOWN_HEIGHT];
 
 char color_to_char(uint32_t pixel)
 {
-    int r = NVC_Red(pixel);
-    int g = NVC_Green(pixel);
-    int b = NVC_Blue(pixel);
-    // TODO: brightness should take into account tranparency as well
-    int bright = r;
-    if (bright < g) bright = g;
-    if (bright < b) bright = b;
+    float r = NVC_Red(pixel);
+    float g = NVC_Green(pixel);
+    float b = NVC_Blue(pixel);
+    float a = NVC_Alpha(pixel);
 
-    char table[] = " .:a@#";
+    float luminance = 0.299f * r + 0.587f * g + 0.114f * b;
+    luminance = luminance * (a / 255.0f);
+
+    char table[] = "           ......,,,:::;;++rr**zzssTTvvJ7(|Fi{C}fI31tlunneoZ5Yxjyaa2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
     int n = sizeof(table) - 1;
-    return table[bright*n/256];
+    int index = (int)((luminance * n) / 255.0f);
+    if (index < 0) index = 0;
+    if (index > n) index = n;
+    return table[index];
 }
 
 uint32_t compress_pixels_chunk(NVC_Canvas oc)
 {
-    int r = 0;
-    int g = 0;
-    int b = 0;
-    int a = 0;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
 
-    for (int y = -NVC_CV_OY; y < oc.height - NVC_CV_OY; ++y) {
-        for (int x = -NVC_CV_OX; x < oc.width - NVC_CV_OX; ++x) {
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
             r += NVC_Red(NVC_PIXEL(oc, x, y));
             g += NVC_Green(NVC_PIXEL(oc, x, y));
             b += NVC_Blue(NVC_PIXEL(oc, x, y));
@@ -225,7 +188,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
     b /= oc.width*oc.height;
     a /= oc.width*oc.height;
 
-    return NVC_RGBA(r, g, b, a);
+    return NVC_RGBA((uint8_t)r, (uint8_t)g, (uint8_t)b, (uint8_t)a);
 }
 
 void compress_pixels(uint32_t *pixels)
@@ -234,7 +197,7 @@ void compress_pixels(uint32_t *pixels)
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,
-                    Vec2D(x*SCALE_DOWN_FACTOR - NVC_CV_OX, y*SCALE_DOWN_FACTOR - NVC_CV_OY),
+                    Vec2D(x*SCALE_DOWN_FACTOR, y*SCALE_DOWN_FACTOR),
                     Vec2D(SCALE_DOWN_FACTOR, SCALE_DOWN_FACTOR));
             char_canvas[y*SCALED_DOWN_WIDTH + x] = color_to_char(compress_pixels_chunk(soc));
         }

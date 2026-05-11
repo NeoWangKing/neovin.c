@@ -25,14 +25,6 @@
 #endif
 #define NVC_AA_PAD (1./NVC_AA_RES)
 
-// Axis Original Point
-#ifndef NVC_CV_OY
-#define NVC_CV_OY 0
-#endif
-#ifndef NVC_CV_OX
-#define NVC_CV_OX 0
-#endif
-
 #define NVC_SWAP(T, a, b) do { T t = a; a = b; b = t; } while (0)
 #define NVC_SIGN(T, x) ((T)((x) > 0) - (T)((x) < 0))
 #define NVC_ABS(T, x) (NVC_SIGN(T, x)*(x))
@@ -1011,7 +1003,7 @@ typedef struct {
 } NVC_Canvas;
 #define NVC_Canvas(data, w, h, s) (NVC_Canvas) { .height = (h), .width = (w), .stride = (s), .pixels = (data) }
 #define NVC_CANVAS_NULL ((NVC_Canvas) {0})
-#define NVC_PIXEL(oc, x, y) (oc).pixels[((int)(y)+NVC_CV_OY)*(oc).stride + (int)(x) + NVC_CV_OX]
+#define NVC_PIXEL(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
 
 typedef struct {
     float x;
@@ -1068,30 +1060,40 @@ NEOVINCDEF uint8_t  NVC_Red(uint32_t pixel);
 NEOVINCDEF uint8_t  NVC_Green(uint32_t pixel);
 NEOVINCDEF uint8_t  NVC_Blue(uint32_t pixel);
 NEOVINCDEF uint8_t  NVC_Alpha(uint32_t pixel);
+NEOVINCDEF uint32_t NVC_RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 NEOVINCDEF uint32_t NVC_Pack_RGBA32(uint8_t comp[COUNT_COMP]);
 NEOVINCDEF void     NVC_Modi_Color(uint32_t *color, COLOR index, uint8_t value);
 NEOVINCDEF void     NVC_Transparent_Color(uint32_t *color, float alpha);
 NEOVINCDEF void     NVC_Bright_Color(uint32_t *color, float rate);
-NEOVINCDEF uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t);
+NEOVINCDEF uint32_t NVC_Mix_Colors_Alpha(uint32_t color_b, uint32_t color_t);
+NEOVINCDEF uint32_t NVC_Mix_Colors3(uint32_t c1, uint32_t c2, uint32_t c3, float u1, float u2, float u3);
 NEOVINCDEF uint32_t NVC_Blend_Color_Normal(uint32_t color_b, uint32_t color_t);
 NEOVINCDEF uint32_t NVC_Blend_Color_Darken(uint32_t color_b, uint32_t color_t);
 NEOVINCDEF uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t);
 
 NEOVINCDEF void  NVC_Set_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color);
+
 NEOVINCDEF void  NVC_Set_Background(NVC_Canvas oc, uint32_t color);
 NEOVINCDEF void  NVC_Fill_Background(NVC_Canvas oc, uint32_t color);
+
 NEOVINCDEF void  NVC_Fill_Rectangle(NVC_Canvas oc, Vec2D p, Vec2D s, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Rectangle(NVC_Canvas oc, Vec2D p, Vec2D s, float thick, uint32_t color);
+
 NEOVINCDEF void  NVC_Fill_Circle(NVC_Canvas oc, Vec2D p, float r, uint32_t color);
 NEOVINCDEF void  NVC_Point(NVC_Canvas oc, Vec2D p, float r, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Circle(NVC_Canvas oc, Vec2D p, float r, float thick, uint32_t color);
+
 NEOVINCDEF void  NVC_Draw_Line(NVC_Canvas oc, Vec2D p1, Vec2D p2, uint32_t color);
 NEOVINCDEF float NVC_Dist_To_Line(Vec2D p, Vec2D p1, Vec2D p2);
 NEOVINCDEF void  NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick, uint32_t color);
+
 NEOVINCDEF bool  NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3);
 NEOVINCDEF void  NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, float thick, uint32_t color);
+NEOVINCDEF void  NVC_Barycentric(Vec2D p1, Vec2D p2, Vec2D p3, Vec2D p, float *u1, float *u2, float *u3, float *det);
+NEOVINCDEF void  NVC_Fill_Triangle_C3(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t c1, uint32_t c2, uint32_t c3);
+
 NEOVINCDEF void  NVC_Text(NVC_Canvas oc, const char *text, Vec2D tp, NVC_Font font, float ts, uint32_t color);
 NEOVINCDEF void  NVC_Copy(NVC_Canvas dst, NVC_Canvas src);
 
@@ -1146,8 +1148,8 @@ NEOVINCDEF NVC_Canvas NVC_Make_Canvas(uint32_t *pixels, int width, int height, i
 
 NEOVINCDEF NVC_Canvas NVC_Make_SubCanvas(NVC_Canvas src, Vec2D p, Vec2D s)
 {
-    int x0 = p.x + NVC_CV_OX;
-    int y0 = p.y + NVC_CV_OY;
+    int x0 = p.x;
+    int y0 = p.y;
     int x1 = x0 + s.x;
     int y1 = y0 + s.y;
     if (x0 > x1) NVC_SWAP(int, x0, x1);
@@ -1163,16 +1165,16 @@ NEOVINCDEF NVC_Canvas NVC_Make_SubCanvas(NVC_Canvas src, Vec2D p, Vec2D s)
 
 NEOVINCDEF bool NVC_Is_In_Canvas(NVC_Canvas oc, Vec2D p)
 {
-    float ax = p.x+NVC_CV_OX;
-    float ay = p.y+NVC_CV_OY;
+    float ax = p.x;
+    float ay = p.y;
     if (ax >= 0 && ax < oc.width && ay >= 0 && ay < oc.height) return true;
     return false;
 }
 
 NEOVINCDEF bool NVC_Normalize_Range(NVC_Canvas oc, Vec2D p, Vec2D s, NVC_Normalized_Range *nr)
 {
-    float x_abs = p.x + NVC_CV_OX;
-    float y_abs = p.y + NVC_CV_OY;
+    float x_abs = p.x;
+    float y_abs = p.y;
     nr->x1 = (int)x_abs;
     nr->y1 = (int)y_abs;
 
@@ -1199,12 +1201,6 @@ NEOVINCDEF bool NVC_Normalize_Range(NVC_Canvas oc, Vec2D p, Vec2D s, NVC_Normali
     if (nr->x2 >= (int)oc.width)       nr->x2 = (int)oc.width - 1;
     if (nr->y1 < 0)                    nr->y1 = 0;
     if (nr->y2 >= (int)oc.height)      nr->y2 = (int)oc.height - 1;
-
-    // 转换回相对画布原点的坐标
-    nr->x1 -= (int)NVC_CV_OX;
-    nr->x2 -= (int)NVC_CV_OX;
-    nr->y1 -= (int)NVC_CV_OY;
-    nr->y2 -= (int)NVC_CV_OY;
 
     return true;
 }
@@ -1276,7 +1272,7 @@ NEOVINCDEF uint8_t NVC_Red(uint32_t pixel) { return (pixel >> 0) & 0xFF; }
 NEOVINCDEF uint8_t NVC_Green(uint32_t pixel) { return (pixel >> 8) & 0xFF; }
 NEOVINCDEF uint8_t NVC_Blue(uint32_t pixel) { return (pixel >> 16) & 0xFF; }
 NEOVINCDEF uint8_t NVC_Alpha(uint32_t pixel) { return (pixel >> 24) & 0xFF; }
-NEOVINCDEF uint8_t NVC_RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+NEOVINCDEF uint32_t NVC_RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
     uint32_t result = 0;
     result |= r<<(8*0);
@@ -1325,7 +1321,7 @@ NEOVINCDEF void NVC_Bright_Color(uint32_t *color, float rate)
     *color = NVC_Pack_RGBA32(comp);
 }
 
-NEOVINCDEF uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t)
+NEOVINCDEF uint32_t NVC_Mix_Colors_Alpha(uint32_t color_b, uint32_t color_t)
 {
     uint8_t comp_b[COUNT_COMP];
     NVC_Unpack_RGBA32(color_b, comp_b);
@@ -1345,6 +1341,20 @@ NEOVINCDEF uint32_t NVC_Mix_Color_Alpha(uint32_t color_b, uint32_t color_t)
     }
 
     return NVC_Pack_RGBA32(comp_f);
+}
+
+NEOVINCDEF uint32_t NVC_Mix_Colors3(uint32_t c1, uint32_t c2, uint32_t c3, float u1, float u2, float u3)
+{
+    int64_t r1 = NVC_Red(c1), g1 = NVC_Green(c1), b1 = NVC_Blue(c1), a1 = NVC_Alpha(c1);
+    int64_t r2 = NVC_Red(c2), g2 = NVC_Green(c2), b2 = NVC_Blue(c2), a2 = NVC_Alpha(c2);
+    int64_t r3 = NVC_Red(c3), g3 = NVC_Green(c3), b3 = NVC_Blue(c3), a3 = NVC_Alpha(c3);
+
+    int64_t r = r1*u1 + r2*u2 + r3*u3;
+    int64_t g = g1*u1 + g2*u2 + g3*u3;
+    int64_t b = b1*u1 + b2*u2 + b3*u3;
+    int64_t a = a1*u1 + a2*u2 + a3*u3;
+
+    return NVC_RGBA(r, g, b, a);
 }
 
 NEOVINCDEF uint32_t NVC_Blend_Color_Normal(uint32_t color_b, uint32_t color_t)
@@ -1405,8 +1415,8 @@ NEOVINCDEF uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t)
 NEOVINCDEF void NVC_Set_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color)
 {
     // 将相对坐标转换为绝对坐标进行边界检查
-    int ax = (int)p.x + NVC_CV_OX;
-    int ay = (int)p.y + NVC_CV_OY;
+    int ax = (int)p.x;
+    int ay = (int)p.y;
     if (ax < 0 || ax >= oc.width || ay < 0 || ay >= oc.height) return;
     // 使用 NVC_PIXEL 进行写入
     NVC_PIXEL(oc, p.x, p.y) = color;
@@ -1414,17 +1424,17 @@ NEOVINCDEF void NVC_Set_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color)
 
 NEOVINCDEF void NVC_Draw_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color)
 {
-    int ax = (int)p.x + NVC_CV_OX;
-    int ay = (int)p.y + NVC_CV_OY;
+    int ax = (int)p.x;
+    int ay = (int)p.y;
     if (ax < 0 || ax >= oc.width || ay < 0 || ay >= oc.height) return;
     uint32_t* pixel = &NVC_PIXEL(oc, p.x, p.y);
-    *pixel = NVC_Mix_Color_Alpha(*pixel, color);
+    *pixel = NVC_Mix_Colors_Alpha(*pixel, color);
 }
 
 NEOVINCDEF void NVC_Set_Background(NVC_Canvas oc, uint32_t color)
 {
-    for (int y = -NVC_CV_OY; y < oc.height-NVC_CV_OY; ++y) {
-        for (int x = 0-NVC_CV_OX; x < oc.width-NVC_CV_OX; ++x) {
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
             NVC_Set_Pixel(oc, Vec2D(x, y), color);
         }
     }
@@ -1432,8 +1442,8 @@ NEOVINCDEF void NVC_Set_Background(NVC_Canvas oc, uint32_t color)
 
 NEOVINCDEF void NVC_Fill_Background(NVC_Canvas oc, uint32_t color)
 {
-    for (int y = -NVC_CV_OY; y < oc.height-NVC_CV_OY; ++y) {
-        for (int x = 0-NVC_CV_OX; x < oc.width-NVC_CV_OX; ++x) {
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
             NVC_Draw_Pixel(oc, Vec2D(x, y), color);
         }
     }
@@ -1478,25 +1488,21 @@ NEOVINCDEF void NVC_Fill_Rectangle(NVC_Canvas oc, Vec2D p, Vec2D s, uint32_t col
 
 NEOVINCDEF void NVC_Draw_Rectangle(NVC_Canvas oc, Vec2D p, Vec2D s, float thick, uint32_t color)
 {
-    // 标准化矩形，计算外边界（边框外侧）和内边界（边框内侧）
     float x0 = p.x, x1 = p.x + s.x;
     if (x0 > x1) NVC_SWAP(float, x0, x1);
     float y0 = p.y, y1 = p.y + s.y;
     if (y0 > y1) NVC_SWAP(float, y0, y1);
 
-    // 外矩形（边框外侧，扩展了线宽的一半）
     float outer_x0 = x0 - thick * 0.5f;
     float outer_y0 = y0 - thick * 0.5f;
     float outer_x1 = x1 + thick * 0.5f;
     float outer_y1 = y1 + thick * 0.5f;
 
-    // 内矩形（边框内侧，即原始矩形区域）
     float inner_x0 = x0 + thick * 0.5f;
     float inner_y0 = y0 + thick * 0.5f;
     float inner_x1 = x1 - thick * 0.5f;
     float inner_y1 = y1 - thick * 0.5f;
 
-    // 裁剪到画布
     NVC_Normalized_Range bnr;
     NVC_Normalize_Range(oc, Vec2D(outer_x0, outer_y0),
             Vec2D(outer_x1 - outer_x0, outer_y1 - outer_y0),
@@ -1677,8 +1683,8 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
 
     for (int x = nr.x1; x <= nr.x2; ++x) {
         for (int y = nr.y1; y <= nr.y2; ++y) {
-            if (NVC_Dist_To_Line(Vec2D(x+0.5f, y+0.5f), p1, p2) > (half+d)) continue;
-            if (NVC_Dist_To_Line(Vec2D(x+0.5f, y+0.5f), p1, p2) < (half-d)) {
+            if (NVC_Dist_To_Line(Vec2D(x+0.5f, y+0.5f), p1, p2) > (half+d)*(half+d)) continue;
+            if (NVC_Dist_To_Line(Vec2D(x+0.5f, y+0.5f), p1, p2) < (half-d)*(half-d)) {
                 NVC_Draw_Pixel(oc, Vec2D(x, y), color);
                 continue;
             }
@@ -1687,7 +1693,7 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
                 float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
                 for (int sx = 0; sx < NVC_AA_RES; ++sx) {
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
-                    if (NVC_Dist_To_Line(Vec2D(ax, ay), p1, p2) <= half) {
+                    if (NVC_Dist_To_Line(Vec2D(ax, ay), p1, p2) <= half * half) {
                         count += 1;
                     }
                 }
@@ -1724,18 +1730,10 @@ NEOVINCDEF bool NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3)
 
 NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
 {
-    int x_max = (int)p1.x;
-    int y_max = (int)p1.y;
-    if (p2.x > x_max) x_max = p2.x;
-    if (p2.y > y_max) y_max = p2.y;
-    if (p3.x > x_max) x_max = p3.x;
-    if (p3.y > y_max) y_max = p3.y;
-    int x_min = (int)p1.x;
-    int y_min = (int)p1.y;
-    if (p2.x < x_min) x_min = p2.x;
-    if (p2.y < y_min) y_min = p2.y;
-    if (p3.x < x_min) x_min = p3.x;
-    if (p3.y < y_min) y_min = p3.y;
+    int x_min = (int)floor(fminf(p1.x, fminf(p2.x, p3.x)));
+    int y_min = (int)floor(fminf(p1.y, fminf(p2.y, p3.y)));
+    int x_max = (int)ceil(fmaxf(p1.x, fmaxf(p2.x, p3.x)));
+    int y_max = (int)ceil(fmaxf(p1.y, fmaxf(p2.y, p3.y)));
     NVC_Normalized_Range nr;
     NVC_Normalize_Range(oc, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
     for (int y = nr.y1; y <= nr.y2; ++y) {
@@ -1764,6 +1762,55 @@ NEOVINCDEF void NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, f
     NVC_Draw_Line_Ex(oc, p1, p2, thick, color);
     NVC_Draw_Line_Ex(oc, p2, p3, thick, color);
     NVC_Draw_Line_Ex(oc, p3, p1, thick, color);
+}
+
+NEOVINCDEF void NVC_Barycentric(Vec2D p1, Vec2D p2, Vec2D p3, Vec2D p, float *u1, float *u2, float *u3, float *det)
+{
+    *det = ((p1.x - p3.x)*(p2.y - p3.y) - (p2.x - p3.x)*(p1.y - p3.y));
+    *u1  = ((p2.y - p3.y)*(p.x - p3.x) + (p3.x - p2.x)*(p.y - p3.y)) / *det;
+    *u2  = ((p3.y - p1.y)*(p.x - p3.x) + (p1.x - p3.x)*(p.y - p3.y)) / *det;
+    *u3  = 1.f - *u1 - *u2;
+}
+
+NEOVINCDEF void NVC_Fill_Triangle_C3(NVC_Canvas oc,
+                                     Vec2D    p1, Vec2D    p2, Vec2D    p3,
+                                     uint32_t c1, uint32_t c2, uint32_t c3)
+{
+    int x_min = (int)floor(fminf(p1.x, fminf(p2.x, p3.x)));
+    int y_min = (int)floor(fminf(p1.y, fminf(p2.y, p3.y)));
+    int x_max = (int)ceil(fmaxf(p1.x, fmaxf(p2.x, p3.x)));
+    int y_max = (int)ceil(fmaxf(p1.y, fmaxf(p2.y, p3.y)));
+    NVC_Normalized_Range nr;
+    NVC_Normalize_Range(oc, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
+    for (int y = nr.y1; y <= nr.y2; ++y) {
+        for (int x = nr.x1; x <= nr.x2; ++x) {
+            int count = 0;
+            uint32_t final_color = 0;
+            int total_r = 0, total_g = 0, total_b = 0, total_a = 0;
+            for (int sy = 0; sy < NVC_AA_RES; ++sy) {
+                float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
+                for (int sx = 0; sx < NVC_AA_RES; ++sx) {
+                    float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
+                    if (NVC_IS_IN_TRIANGLE(Vec2D(ax, ay), p1, p2, p3)) {
+                        float u1, u2, u3, det;
+                        NVC_Barycentric(p1, p2, p3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
+                        if (det == 0) continue;
+                        uint32_t sub_color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
+                        total_r += NVC_Red(sub_color);
+                        total_g += NVC_Green(sub_color);
+                        total_b += NVC_Blue(sub_color);
+                        total_a += NVC_Alpha(sub_color);
+                        count++;
+                    }
+                }
+            }
+            if (count) {
+                final_color = NVC_RGBA(total_r/count, total_g/count, total_b/count, total_a/count);
+                NVC_Transparent_Color(&final_color, (float)count / (NVC_AA_RES*NVC_AA_RES));
+                NVC_Draw_Pixel(oc, Vec2D(x, y), final_color);
+            }
+        }
+    }
 }
 
 NEOVINCDEF void NVC_Text(NVC_Canvas oc, const char *text, Vec2D tp, NVC_Font font, float ts, uint32_t color)
@@ -1819,8 +1866,8 @@ NEOVINCDEF void NVC_Copy(NVC_Canvas dst, NVC_Canvas src)
 
 NEOVINCDEF void NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Vec2D s)
 {
-    int x0 = p.x + NVC_CV_OX;
-    int y0 = p.y + NVC_CV_OY;
+    int x0 = p.x;
+    int y0 = p.y;
     int x1 = x0 + s.x;
     int y1 = y0 + s.y;
     float w = NVC_ABS(float, s.x);
@@ -1840,6 +1887,7 @@ NEOVINCDEF void NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Ve
 
 #endif // NEOVIN_C_IMPLEMENTATION
 
-// TODO: Font loadingp
-// TODO: Texture loadingp
+// TODO: Font loading
+// TODO: Texture loading
 // TODO: 3D Drawing
+// TODO: rainbow triangle

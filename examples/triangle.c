@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+// #define PLATFORM 2
+
 #define WASM_PLATFORM 0
 #define RAYLIB_PLATFORM 1
 #define TERM_PLATFORM 2
@@ -18,6 +20,12 @@
 
 static uint32_t pixels[WIDTH*HEIGHT];
 float angle = 0.f;
+float acx = 0;
+float acy = 0;
+float vcx = 200;
+float vcy = 200;
+float pcx = 400;
+float pcy = 300;
 
 float get_angle() {
     return angle;
@@ -53,7 +61,7 @@ uint32_t *render(float dt)
 {
     NVC_Canvas oc = NVC_Make_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
 
-    angle += M_PI*dt;
+    angle += 0.5*M_PI*dt;
 
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
@@ -64,10 +72,19 @@ uint32_t *render(float dt)
     rotate_point(&p1, center, angle);
     rotate_point(&p2, center, angle);
     rotate_point(&p3, center, angle);
-    NVC_Fill_Triangle(oc, p1, p2, p3, 0xFF2020AA);
+    // NVC_Fill_Triangle(oc, p1, p2, p3, 0xFF2020AA);
+    NVC_Fill_Triangle_C3(oc, p1, p2, p3, 0xFF2020AA, 0xFF20AA20, 0xFFAA2020);
 
-    Vec2D p4 = { 400, 300 };
-    NVC_Fill_Circle(oc, p4, 200, 0x66AA2020);
+    float radius = 150;
+    pcx += vcx*dt;
+    pcy += vcy*dt;
+    if (pcx <= radius) { pcx = radius; vcx *= -1; }
+    if (pcy <= radius) { pcy = radius; vcy *= -1; }
+    if (pcx >= WIDTH-radius) { pcx = WIDTH-radius; vcx *= -1; }
+    if (pcy >= HEIGHT-radius) { pcy = HEIGHT-radius; vcy *= -1; }
+    vcx += acx*dt;
+    vcy += acy*dt;
+    NVC_Fill_Circle(oc, Vec2D(pcx, pcy), radius, 0x66AA2020);
 
     return pixels;
 }
@@ -138,28 +155,31 @@ char char_canvas[SCALED_DOWN_WIDTH*SCALED_DOWN_HEIGHT];
 
 char color_to_char(uint32_t pixel)
 {
-    int r = NVC_Red(pixel);
-    int g = NVC_Green(pixel);
-    int b = NVC_Blue(pixel);
-    // TODO: brightness should take into account tranparency as well
-    int bright = r;
-    if (bright < g) bright = g;
-    if (bright < b) bright = b;
+    float r = NVC_Red(pixel);
+    float g = NVC_Green(pixel);
+    float b = NVC_Blue(pixel);
+    float a = NVC_Alpha(pixel);
 
-    char table[] = " .:a@#";
+    float luminance = 0.299f * r + 0.587f * g + 0.114f * b;
+    luminance = luminance * (a / 255.0f);
+
+    char table[] = "           ......,,,:::;;++rr**zzssTTvvJ7(|Fi{C}fI31tlunneoZ5Yxjyaa2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
     int n = sizeof(table) - 1;
-    return table[bright*n/256];
+    int index = (int)((luminance * n) / 255.0f);
+    if (index < 0) index = 0;
+    if (index > n) index = n;
+    return table[index];
 }
 
 uint32_t compress_pixels_chunk(NVC_Canvas oc)
 {
-    int r = 0;
-    int g = 0;
-    int b = 0;
-    int a = 0;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
 
-    for (int y = -NVC_CV_OY; y < oc.height - NVC_CV_OY; ++y) {
-        for (int x = -NVC_CV_OX; x < oc.width - NVC_CV_OX; ++x) {
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
             r += NVC_Red(NVC_PIXEL(oc, x, y));
             g += NVC_Green(NVC_PIXEL(oc, x, y));
             b += NVC_Blue(NVC_PIXEL(oc, x, y));
@@ -172,7 +192,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
     b /= oc.width*oc.height;
     a /= oc.width*oc.height;
 
-    return NVC_RGBA(r, g, b, a);
+    return NVC_RGBA((uint8_t)r, (uint8_t)g, (uint8_t)b, (uint8_t)a);
 }
 
 void compress_pixels(uint32_t *pixels)
@@ -181,7 +201,7 @@ void compress_pixels(uint32_t *pixels)
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,
-                    Vec2D(x*SCALE_DOWN_FACTOR - NVC_CV_OX, y*SCALE_DOWN_FACTOR - NVC_CV_OY),
+                    Vec2D(x*SCALE_DOWN_FACTOR, y*SCALE_DOWN_FACTOR),
                     Vec2D(SCALE_DOWN_FACTOR, SCALE_DOWN_FACTOR));
             char_canvas[y*SCALED_DOWN_WIDTH + x] = color_to_char(compress_pixels_chunk(soc));
         }

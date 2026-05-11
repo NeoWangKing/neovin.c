@@ -12,16 +12,8 @@
 #define HEIGHT 600
 #include "neovin.c"
 
-// #if PLATFORM != RAYLIB_PLATFORM
-// #define STB_IMAGE_WRITE_IMPLEMENTATION
-// #define STB_IMAGE_IMPLEMENTATION
-// #endif
-//
-// #include "thirdparty/stb_image_write.h"
-// #include "thirdparty/stb_image.h"
-
-// #include "neowang.c"
-#include "amiya.c"
+#include "./imgs/neowang.c"
+// #include "./imgs/amiya.c"
 
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
@@ -39,26 +31,24 @@ float get_angle() {
 uint32_t *render(float dt)
 {
     static uint32_t pixels[WIDTH*HEIGHT];
-    angle += 4 * M_PI * dt;
+    angle += 6 * M_PI * dt;
 
-    // const char *png_file_path = "NeoWangKing.png";
-    // NVC_Texture texture;
-    // texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
-    // if (texture.data == NULL) {
-    //     fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
-    // }
-    
     NVC_Texture texture;
-    texture.data = amiya_data;
-    texture.width = amiya_width;
-    texture.height = amiya_height;
+    // texture.data = amiya_data;
+    // texture.width = amiya_width;
+    // texture.height = amiya_height;
+    texture.data = neowang_data;
+    texture.width = neowang_width;
+    texture.height = neowang_height;
 
 
     NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    float w = (float)texture.width/(1+0.2*sinf(angle));
-    float h = (float)texture.height*(1+0.2*sinf(angle));
+    float w = (float)WIDTH/(1+0.2*sinf(angle));
+    float h = (float)HEIGHT*(1+0.2*sinf(angle));
+    w /= 1.5;
+    h /= 1.5;
     float x = (float)WIDTH/2 - w/2;
     float y = (float)HEIGHT/2 - h/2;
     NVC_Draw_Texture(oc, texture, Vec2D(x, y), Vec2D(w, h));
@@ -130,28 +120,31 @@ char char_canvas[SCALED_DOWN_WIDTH*SCALED_DOWN_HEIGHT];
 
 char color_to_char(uint32_t pixel)
 {
-    int r = NVC_Red(pixel);
-    int g = NVC_Green(pixel);
-    int b = NVC_Blue(pixel);
-    // TODO: brightness should take into account tranparency as well
-    int bright = r;
-    if (bright < g) bright = g;
-    if (bright < b) bright = b;
+    float r = NVC_Red(pixel);
+    float g = NVC_Green(pixel);
+    float b = NVC_Blue(pixel);
+    float a = NVC_Alpha(pixel);
 
-    char table[] = " .:a@#";
+    float luminance = 0.299f * r + 0.587f * g + 0.114f * b;
+    luminance = luminance * (a / 255.0f);
+
+    char table[] = "           ......,,,:::;;++rr**zzssTTvvJ7(|Fi{C}fI31tlunneoZ5Yxjyaa2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
     int n = sizeof(table) - 1;
-    return table[bright*n/256];
+    int index = (int)((luminance * n) / 255.0f);
+    if (index < 0) index = 0;
+    if (index > n) index = n;
+    return table[index];
 }
 
 uint32_t compress_pixels_chunk(NVC_Canvas oc)
 {
-    int r = 0;
-    int g = 0;
-    int b = 0;
-    int a = 0;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
 
-    for (int y = -NVC_CV_OY; y < oc.height - NVC_CV_OY; ++y) {
-        for (int x = -NVC_CV_OX; x < oc.width - NVC_CV_OX; ++x) {
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
             r += NVC_Red(NVC_PIXEL(oc, x, y));
             g += NVC_Green(NVC_PIXEL(oc, x, y));
             b += NVC_Blue(NVC_PIXEL(oc, x, y));
@@ -164,7 +157,7 @@ uint32_t compress_pixels_chunk(NVC_Canvas oc)
     b /= oc.width*oc.height;
     a /= oc.width*oc.height;
 
-    return NVC_RGBA(r, g, b, a);
+    return NVC_RGBA((uint8_t)r, (uint8_t)g, (uint8_t)b, (uint8_t)a);
 }
 
 void compress_pixels(uint32_t *pixels)
@@ -173,7 +166,7 @@ void compress_pixels(uint32_t *pixels)
     for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
         for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
             NVC_Canvas soc = NVC_Make_SubCanvas(oc,
-                    Vec2D(x*SCALE_DOWN_FACTOR - NVC_CV_OX, y*SCALE_DOWN_FACTOR - NVC_CV_OY),
+                    Vec2D(x*SCALE_DOWN_FACTOR, y*SCALE_DOWN_FACTOR),
                     Vec2D(SCALE_DOWN_FACTOR, SCALE_DOWN_FACTOR));
             char_canvas[y*SCALED_DOWN_WIDTH + x] = color_to_char(compress_pixels_chunk(soc));
         }

@@ -10,13 +10,6 @@ cd "$HOME/emsdk" > /dev/null 2>&1
 . ./emsdk_env.sh > /dev/null 2>&1
 cd "$CURDIR" > /dev/null 2>&1
 
-mkdir -p ./bin/
-
-set -xe
-
-gcc $CFLAGS -o ./bin/test test.c $LIBS -lm
-./bin/test
-
 build_NVC_examples() {
   NAME=$1
 
@@ -38,11 +31,21 @@ build_NVC_examples() {
     -lm
 }
 
-build_NVC_examples triangle
-build_NVC_examples 3d
 
-gcc -I./thirdparty/ -o ./tools/png2c ./tools/png2c.c -lm
-./tools/png2c ./neowang.png neowang > neowang.c
-./tools/png2c ./amiya.png amiya > amiya.c
+mkdir -p ./bin/
 
-build_NVC_examples squish
+set -xe
+
+gcc $CFLAGS -o ./bin/test test.c $LIBS -lm &
+gcc -I./thirdparty/ -o ./tools/png2c ./tools/png2c.c -lm &
+./tools/png2c ./imgs/neowang.png neowang > ./imgs/neowang.c &
+./tools/png2c ./imgs/amiya.png amiya > ./imgs/amiya.c &
+wait
+
+./bin/test &
+wait
+
+build_NVC_examples triangle &
+build_NVC_examples 3d &
+build_NVC_examples squish &
+wait
