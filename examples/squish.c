@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
+// #define PLATFORM 2
+
 #define WASM_PLATFORM 0
 #define RAYLIB_PLATFORM 1
+#define TERM_PLATFORM 2
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -17,7 +20,7 @@
 // #include "thirdparty/stb_image_write.h"
 // #include "thirdparty/stb_image.h"
 
-#include "neowang.c"
+// #include "neowang.c"
 #include "amiya.c"
 
 #define BACKGROUND_COLOR 0xFF181818
@@ -106,6 +109,93 @@ int main(void)
 
     UnloadTexture(tex);
     CloseWindow();
+    return 0;
+}
+#elif PLATFORM == TERM_PLATFORM
+
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <errno.h>
+#include <unistd.h>
+
+#define SCALE_DOWN_FACTOR 5
+static_assert(WIDTH%SCALE_DOWN_FACTOR == 0, "WIDTH must be divisible by the SCALE_DOWN_FACTOR");
+#define SCALED_DOWN_WIDTH (WIDTH/SCALE_DOWN_FACTOR)
+static_assert(HEIGHT%SCALE_DOWN_FACTOR == 0, "HEIGHT must be divisible by the SCALE_DOWN_FACTOR");
+#define SCALED_DOWN_HEIGHT (HEIGHT/SCALE_DOWN_FACTOR)
+
+char char_canvas[SCALED_DOWN_WIDTH*SCALED_DOWN_HEIGHT];
+
+char color_to_char(uint32_t pixel)
+{
+    int r = NVC_Red(pixel);
+    int g = NVC_Green(pixel);
+    int b = NVC_Blue(pixel);
+    // TODO: brightness should take into account tranparency as well
+    int bright = r;
+    if (bright < g) bright = g;
+    if (bright < b) bright = b;
+
+    char table[] = " .:a@#";
+    int n = sizeof(table) - 1;
+    return table[bright*n/256];
+}
+
+uint32_t compress_pixels_chunk(NVC_Canvas oc)
+{
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int a = 0;
+
+    for (int y = -NVC_CV_OY; y < oc.height - NVC_CV_OY; ++y) {
+        for (int x = -NVC_CV_OX; x < oc.width - NVC_CV_OX; ++x) {
+            r += NVC_Red(NVC_PIXEL(oc, x, y));
+            g += NVC_Green(NVC_PIXEL(oc, x, y));
+            b += NVC_Blue(NVC_PIXEL(oc, x, y));
+            a += NVC_Alpha(NVC_PIXEL(oc, x, y));
+        }
+    }
+
+    r /= oc.width*oc.height;
+    g /= oc.width*oc.height;
+    b /= oc.width*oc.height;
+    a /= oc.width*oc.height;
+
+    return NVC_RGBA(r, g, b, a);
+}
+
+void compress_pixels(uint32_t *pixels)
+{
+    NVC_Canvas oc = NVC_Canvas(pixels, WIDTH, HEIGHT, WIDTH);
+    for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
+        for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
+            NVC_Canvas soc = NVC_Make_SubCanvas(oc,
+                    Vec2D(x*SCALE_DOWN_FACTOR - NVC_CV_OX, y*SCALE_DOWN_FACTOR - NVC_CV_OY),
+                    Vec2D(SCALE_DOWN_FACTOR, SCALE_DOWN_FACTOR));
+            char_canvas[y*SCALED_DOWN_WIDTH + x] = color_to_char(compress_pixels_chunk(soc));
+        }
+    }
+}
+
+int main(void)
+{
+    for (;;) {
+        compress_pixels(render(1.f/60.f));
+        for (int y = 0; y < SCALED_DOWN_HEIGHT; ++y) {
+            for (int x = 0; x < SCALED_DOWN_WIDTH; ++x) {
+                putc(char_canvas[y*SCALED_DOWN_WIDTH + x], stdout);
+                putc(char_canvas[y*SCALED_DOWN_WIDTH + x], stdout);
+            }
+            putc('\n', stdout);
+        }
+
+        usleep(1000*1000/60);
+        printf("\033[%dA", SCALED_DOWN_HEIGHT);
+        printf("\033[%dD", SCALED_DOWN_WIDTH);
+    }
     return 0;
 }
 #elif PLATFORM == WASM_PLATFORM

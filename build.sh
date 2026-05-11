@@ -20,8 +20,9 @@ gcc $CFLAGS -o ./bin/test test.c $LIBS -lm
 build_NVC_examples() {
   NAME=$1
 
+  gcc $CFLAGS -I. -DPLATFORM=TERM_PLATFORM -o ./bin/$NAME.term ./examples/$NAME.c
   gcc $CFLAGS -I. -DPLATFORM=RAYLIB_PLATFORM `pkg-config --cflags raylib`\
-    -o ./bin/$NAME ./examples/$NAME.c\
+    -o ./bin/$NAME.rl ./examples/$NAME.c\
     $LIBS `pkg-config --libs raylib` -lm\
     -framework CoreFoundation\
     -framework CoreGraphics\

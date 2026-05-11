@@ -1064,6 +1064,10 @@ typedef enum {
 } COLOR;
 
 NEOVINCDEF void     NVC_Unpack_RGBA32(uint32_t color, uint8_t comp[COUNT_COMP]);
+NEOVINCDEF uint8_t  NVC_Red(uint32_t pixel);
+NEOVINCDEF uint8_t  NVC_Green(uint32_t pixel);
+NEOVINCDEF uint8_t  NVC_Blue(uint32_t pixel);
+NEOVINCDEF uint8_t  NVC_Alpha(uint32_t pixel);
 NEOVINCDEF uint32_t NVC_Pack_RGBA32(uint8_t comp[COUNT_COMP]);
 NEOVINCDEF void     NVC_Modi_Color(uint32_t *color, COLOR index, uint8_t value);
 NEOVINCDEF void     NVC_Transparent_Color(uint32_t *color, float alpha);
@@ -1266,6 +1270,20 @@ NEOVINCDEF void NVC_Unpack_RGBA32(uint32_t color, uint8_t comp[COUNT_COMP])
         comp[i] = color&0xFF;
         color >>= 8;
     }
+}
+
+NEOVINCDEF uint8_t NVC_Red(uint32_t pixel) { return (pixel >> 0) & 0xFF; }
+NEOVINCDEF uint8_t NVC_Green(uint32_t pixel) { return (pixel >> 8) & 0xFF; }
+NEOVINCDEF uint8_t NVC_Blue(uint32_t pixel) { return (pixel >> 16) & 0xFF; }
+NEOVINCDEF uint8_t NVC_Alpha(uint32_t pixel) { return (pixel >> 24) & 0xFF; }
+NEOVINCDEF uint8_t NVC_RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    uint32_t result = 0;
+    result |= r<<(8*0);
+    result |= g<<(8*1);
+    result |= b<<(8*2);
+    result |= a<<(8*3);
+    return result;
 }
 
 NEOVINCDEF uint32_t NVC_Pack_RGBA32(uint8_t comp[COUNT_COMP])
