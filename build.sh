@@ -47,5 +47,6 @@ build_NVC examples/3d &
 build_NVC examples/squish &
 wait
 mkdir -p ./bin/3d_project/
-build_NVC 3d_project/main &
+build_NVC 3d_project/triangles &
+build_NVC 3d_project/dots &
 wait
