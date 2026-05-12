@@ -1987,11 +1987,14 @@ NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color)
     if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
     uint32_t *space = &NVC_SPACE_3D(oc, x, y);
     float    *z_buf = &NVC_BUF_3D(oc, x, y);
+    uint32_t tmp_color = color;
+    if (p.z > 1) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 0.5*p.z));
+    if (p.z < 1) NVC_Transparent_Color(&tmp_color, p.z);
     if (p.z <= *z_buf) {
-        *space = NVC_Mix_Colors_Alpha(*space, color);
+        *space = NVC_Mix_Colors_Alpha(*space, tmp_color);
         *z_buf = p.z;
     } else {
-        *space = NVC_Mix_Colors_Alpha(color, *space);
+        *space = NVC_Mix_Colors_Alpha(tmp_color, *space);
     }
 }
 
@@ -2126,6 +2129,8 @@ NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Ve
             float z;
             float u1, u2, u3, det;
             int count = 0;
+            uint32_t final_color = 0;
+            int total_r = 0, total_g = 0, total_b = 0, total_a = 0;
             for (int sy = 0; sy < NVC_AA_RES; ++sy) {
                 float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
                 for (int sx = 0; sx < NVC_AA_RES; ++sx) {
@@ -2135,14 +2140,18 @@ NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Ve
                     if (u1 < 0 || u2 < 0 || u3 < 0) continue;
                     float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
                     z = 1.0f / invZ;
+                    uint32_t sub_color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
+                    total_r += NVC_Red(sub_color);
+                    total_g += NVC_Green(sub_color);
+                    total_b += NVC_Blue(sub_color);
+                    total_a += NVC_Alpha(sub_color);
                     count += 1;
                 }
             }
             if (count > 0) {
-                uint32_t color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
-                uint32_t pixel_color = color;
-                NVC_Transparent_Color(&pixel_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
-                NVC_Draw_Pixel_3D(oc, Vec3D((float)x, (float)y, z), color);
+                final_color = NVC_RGBA(total_r/count, total_g/count, total_b/count, total_a/count);
+                NVC_Transparent_Color(&final_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
+                NVC_Draw_Pixel_3D(oc, Vec3D((float)x, (float)y, z), final_color);
             }
         }
     }
