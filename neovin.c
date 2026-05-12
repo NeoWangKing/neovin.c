@@ -1889,4 +1889,3 @@ NEOVINCDEF void NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Ve
 // TODO: Font loading
 // TODO: Texture loading
 // TODO: 3D Drawing
-// TODO: rainbow triangle

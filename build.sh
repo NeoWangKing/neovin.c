@@ -10,12 +10,12 @@ cd "$HOME/emsdk" > /dev/null 2>&1
 . ./emsdk_env.sh > /dev/null 2>&1
 cd "$CURDIR" > /dev/null 2>&1
 
-build_NVC_examples() {
+build_NVC() {
   NAME=$1
 
-  gcc $CFLAGS -I. -DPLATFORM=TERM_PLATFORM -o ./bin/$NAME.term ./examples/$NAME.c
+  gcc $CFLAGS -I. -DPLATFORM=TERM_PLATFORM -o ./bin/$NAME.term $NAME.c
   gcc $CFLAGS -I. -DPLATFORM=RAYLIB_PLATFORM `pkg-config --cflags raylib`\
-    -o ./bin/$NAME.rl ./examples/$NAME.c\
+    -o ./bin/$NAME.rl $NAME.c\
     $LIBS `pkg-config --libs raylib` -lm\
     -framework CoreFoundation\
     -framework CoreGraphics\
@@ -24,28 +24,28 @@ build_NVC_examples() {
     -framework Cocoa\
     -framework OpenGL
   emcc -I. -DPLATFORM=WASM_PLATFORM\
-    -o ./bin/$NAME.wasm ./examples/$NAME.c\
+    -o ./bin/$NAME.wasm $NAME.c\
     -s STANDALONE_WASM=1\
-    -s EXPORTED_FUNCTIONS='["_render","_get_angle","_malloc","_free"]'\
+    -s EXPORTED_FUNCTIONS='["_render","_malloc","_free"]'\
     --no-entry\
     -lm
 }
 
-
-mkdir -p ./bin/
-
 set -xe
 
+mkdir -p ./bin/
 gcc $CFLAGS -o ./bin/test test.c $LIBS -lm &
 gcc -I./thirdparty/ -o ./tools/png2c ./tools/png2c.c -lm &
+wait
 ./tools/png2c ./imgs/neowang.png neowang > ./imgs/neowang.c &
 ./tools/png2c ./imgs/amiya.png amiya > ./imgs/amiya.c &
-wait
-
 ./bin/test &
 wait
-
-build_NVC_examples triangle &
-build_NVC_examples 3d &
-build_NVC_examples squish &
+mkdir -p ./bin/examples/
+build_NVC examples/triangle &
+build_NVC examples/3d &
+build_NVC examples/squish &
+wait
+mkdir -p ./bin/3d_project/
+build_NVC 3d_project/main &
 wait

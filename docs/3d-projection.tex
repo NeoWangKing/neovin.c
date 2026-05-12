@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{3D Projection}
+\begin{center}
+  \def\minY{-2} \def\maxY{2}
+  \def\minZ{-2} \def\maxZ{7}
+  \def\eyeZ{0} \def\eyeY{0}
+  \def\screenZ{2}
+  \def\pZa{4} \def\pYa{2}
+  \def\pZb{3} \def\pYb{-1}
+  \begin{tikzpicture}
+    \draw[-stealth] (\minZ,0) -- (\maxZ,0) node[above]{$z$};
+    \draw[-stealth] (0,\minY) -- (0,\maxY) node[above]{$y$};
+    \draw[fill] (\eyeZ, \eyeY) circle (.5ex) node[above]{Eye $E$};
+    \draw[dotted,thick] (\screenZ,\minY) -- (\screenZ,\maxY) node[above]{Screen};
+    \draw[dotted] (\eyeZ,\eyeY) -- (\pZa,\pYa);
+    \draw[fill] (\pZa,\pYa) circle (.5ex) node[above]{$p_1$};
+    \draw[fill] (\screenZ,{((\pYa - \eyeY)/(\pZa - \eyeZ))*(\screenZ - \eyeZ) + \eyeY}) circle (.5ex) node[above]{$p'_1$};
+    \draw[dotted] (\eyeZ,\eyeY) -- (\pZb,\pYb);
+    \draw[fill] (\pZb,\pYb) circle (.5ex) node[above]{$p_2$};
+    \draw[fill] (\screenZ,{((\pYb - \eyeY)/(\pZb - \eyeZ))*(\screenZ - \eyeZ) + \eyeY}) circle (.5ex) node[above]{$p'_2$};
+  \end{tikzpicture}
+\end{center}
+
+% y = k*x + c
+% k = (y_2 - y_1)/(x_2 - x_1)
+% c = y_1 - k*x_1
+
+\begin{align}
+  p &= (p_x, p_y, p_z) \\
+  E &= (E_x, E_y, E_z) \\
+  S &: z = S_z
+\end{align}
+
+The formula to find $(p'_x, p'_y, p'_z)$
+
+\begin{align}
+  p'_x &= \frac{(p_x - E_x)(S_z - E_z)}{(p_z - E_z)} + E_x \\
+  p'_y &= \frac{(p_y - E_y)(S_z - E_z)}{(p_z - E_z)} + E_y \\
+  p'_z &= S_z
+\end{align}
+
+let $E = (0, 0, 0)$ and $S_z = 1$, then
+
+\begin{align}
+  p'_x = \frac{p_x}{p_z},\quad
+  p'_y = \frac{p_y}{p_z},\quad
+  p'_z = 1
+\end{align}
+
+\end{document}
