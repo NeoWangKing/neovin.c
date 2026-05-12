@@ -80,7 +80,9 @@ int main(void)
 #include <errno.h>
 #include <unistd.h>
 
+#ifndef SCALE_DOWN_FACTOR
 #define SCALE_DOWN_FACTOR 5
+#endif
 static_assert(WIDTH%SCALE_DOWN_FACTOR == 0, "WIDTH must be divisible by the SCALE_DOWN_FACTOR");
 #define SCALED_DOWN_WIDTH (WIDTH/SCALE_DOWN_FACTOR)
 static_assert(HEIGHT%SCALE_DOWN_FACTOR == 0, "HEIGHT must be divisible by the SCALE_DOWN_FACTOR");

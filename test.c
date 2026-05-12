@@ -357,6 +357,53 @@ bool texture_example(const char *file_path)
     return save_as_png(file_path);
 }
 
+bool triangles_3d_example(const char *file_path)
+{
+    float angle = M_PI/6;
+    uint32_t front[WIDTH*HEIGHT];
+    uint32_t space[WIDTH*HEIGHT];
+    uint32_t env[WIDTH*HEIGHT];
+    float    z_buf[WIDTH*HEIGHT];
+
+    NVC_Canvas_3D oc_3d = NVC_CANVAS_3D(oc.pixels, front, space, env, z_buf, WIDTH, HEIGHT, WIDTH);
+    NVC_Fill_Env_3D(oc_3d, BACKGROUND_COLOR);
+    NVC_Clear_Front_3D(oc_3d);
+    NVC_Clear_Space_3D(oc_3d);
+    NVC_Clear_Depth_3D(oc_3d);
+
+    // float z = 1.5 + 0.5*sinf(t);
+    float z = 1.5;
+    Vec3D a = Vec3D(-0.5, -0.5, z);
+    Vec3D b = Vec3D(0.5, -0.5, z);
+    Vec3D c = Vec3D(0, 0.5, z);
+    Vec3D rp = Vec3D(0, 0, z);
+    NVC_ROTATE_POINT(&a, rp, Vec3D(0,1,0), angle);
+    NVC_ROTATE_POINT(&b, rp, Vec3D(0,1,0), angle);
+    NVC_ROTATE_POINT(&c, rp, Vec3D(0,1,0), angle);
+
+    NVC_Point_3D(oc_3d, a, 10, 0xFF1818FF);
+    NVC_Point_3D(oc_3d, b, 10, 0xFF1818FF);
+    NVC_Point_3D(oc_3d, c, 10, 0xFF1818FF);
+    NVC_Fill_Triangle_3D_C3(oc_3d, a, b, c, 0xFFFF5050, 0xFF50FF50, 0xFF5050FF);
+
+    NVC_ROTATE_POINT(&a, rp, Vec3D(0,1,0), M_PI/2);
+    NVC_ROTATE_POINT(&b, rp, Vec3D(0,1,0), M_PI/2);
+    NVC_ROTATE_POINT(&c, rp, Vec3D(0,1,0), M_PI/2);
+
+    NVC_Point_3D(oc_3d, a, 10, 0xFF1818FF);
+    NVC_Point_3D(oc_3d, b, 10, 0xFF1818FF);
+    NVC_Point_3D(oc_3d, c, 10, 0xFF1818FF);
+    NVC_Fill_Triangle_3D_C3(oc_3d, a, b, c, 0xFFFF5050, 0xFF50FF50, 0xFF5050FF);
+
+    NVC_Canvas oc_2d = NVC_CANVAS(front, WIDTH, HEIGHT, WIDTH);
+    float font_size = 24;
+    NVC_Text(oc_2d, "3d triangles Rendering E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
+
+    NVC_Update_Canvas_3D(oc_3d);
+
+    return save_as_png(file_path);
+}
+
 int main(void)
 {
     oc.width = WIDTH;
@@ -374,6 +421,7 @@ int main(void)
     if (!render_3d_example("tests/3d.png")) return -1;
     if (!text_example("tests/text.png")) return -1;
     if (!texture_example("tests/texture.png")) return -1;
+    if (!triangles_3d_example("tests/triangles_3d.png")) return -1;
 
     return 0;
 }

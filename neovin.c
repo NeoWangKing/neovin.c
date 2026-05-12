@@ -1,9 +1,8 @@
-// Copyright 2026 Neo Wang <3245938285@qq.com>
-// MIT License
 
 #ifndef NEOVIN_C_
 #define NEOVIN_C_
 
+#include <float.h>
 #ifndef NEOVIN_C_IMPLEMENTATION
 #define NEOVIN_C_IMPLEMENTATION
 #endif
@@ -995,59 +994,7 @@ static NVC_Font NVC_default_font = {
     .height = NVC_DEFAULT_FONT_HEIGHT,
 };
 
-typedef struct {
-    int height;
-    int width;
-    int stride;
-    uint32_t *pixels;
-} NVC_Canvas;
-#define NVC_CANVAS(data, w, h, s) (NVC_Canvas) { .height = (h), .width = (w), .stride = (s), .pixels = (data) }
-#define NVC_CANVAS_NULL ((NVC_Canvas) {0})
-#define NVC_PIXEL(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
-
-typedef struct {
-    float x;
-    float y;
-} Vec2D;
-#define Vec2D(x, y) ((Vec2D){ (float)(x), (float)(y) })
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-} Vec3D;
-#define Vec3D(x, y, z) ((Vec3D){ (float)(x), (float)(y), (float)(z) })
-
-typedef struct {
-    int x1, x2;
-    int y1, y2;
-
-    int ox1, ox2;
-    int oy1, oy2;
-} NVC_Normalized_Range;
-
-NEOVINCDEF NVC_Canvas NVC_Make_Canvas(uint32_t *pixels, int width, int height, int stride);
-NEOVINCDEF NVC_Canvas NVC_Make_SubCanvas(NVC_Canvas src, Vec2D p, Vec2D s);
-
-NEOVINCDEF bool NVC_ISIN_CANVAS(NVC_Canvas oc, Vec2D p);
-NEOVINCDEF bool NVC_NORM_RANGE(NVC_Canvas oc, Vec2D p, Vec2D s, NVC_Normalized_Range *nr);
-
-// Vec2D
-NEOVINCDEF float NVC_Vec2D_Length(Vec2D vec);
-NEOVINCDEF float NVC_Vec2D_Angle(Vec2D vec);
-NEOVINCDEF Vec2D NVC_Vec2D_Plus(Vec2D vec1, Vec2D vec2);
-NEOVINCDEF Vec2D NVC_Vec2D_Minus(Vec2D vec1, Vec2D vec2);
-NEOVINCDEF float NVC_Vec2D_Dot(Vec2D vec1, Vec2D vec2);
-NEOVINCDEF Vec3D NVC_Vec2D_Cross(Vec2D vec1, Vec2D vec2);
-
-// Vec3D
-NEOVINCDEF void  NVC_ROTATE_POINT(Vec3D *p, Vec3D refp, Vec3D axis, float angle);
-NEOVINCDEF float NVC_Vec3D_Length(Vec3D vec);
-NEOVINCDEF Vec3D NVC_Vec3D_Plus(Vec3D vec1, Vec3D vec2);
-NEOVINCDEF Vec3D NVC_Vec3D_Minus(Vec3D vec1, Vec3D vec2);
-NEOVINCDEF float NVC_Vec3D_Dot(Vec3D vec1, Vec3D vec2);
-NEOVINCDEF Vec3D NVC_Vec3D_Cross(Vec3D vec1, Vec3D vec2);
-
+// COLOR
 typedef enum {
     COMP_RED = 0,
     COMP_GREEN,
@@ -1072,6 +1019,62 @@ NEOVINCDEF uint32_t NVC_Blend_Color_Normal(uint32_t color_b, uint32_t color_t);
 NEOVINCDEF uint32_t NVC_Blend_Color_Darken(uint32_t color_b, uint32_t color_t);
 NEOVINCDEF uint32_t NVC_Blend_Color_Multiply(uint32_t color_b, uint32_t color_t);
 
+typedef struct {
+    float x;
+    float y;
+} Vec2D;
+#define Vec2D(x, y) ((Vec2D){ (float)(x), (float)(y) })
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vec3D;
+#define Vec3D(x, y, z) ((Vec3D){ (float)(x), (float)(y), (float)(z) })
+
+// Vec2D
+NEOVINCDEF float NVC_Vec2D_Length(Vec2D vec);
+NEOVINCDEF float NVC_Vec2D_Angle(Vec2D vec);
+NEOVINCDEF Vec2D NVC_Vec2D_Plus(Vec2D vec1, Vec2D vec2);
+NEOVINCDEF Vec2D NVC_Vec2D_Minus(Vec2D vec1, Vec2D vec2);
+NEOVINCDEF float NVC_Vec2D_Dot(Vec2D vec1, Vec2D vec2);
+NEOVINCDEF Vec3D NVC_Vec2D_Cross(Vec2D vec1, Vec2D vec2);
+
+// Vec3D
+NEOVINCDEF void  NVC_ROTATE_POINT(Vec3D *p, Vec3D refp, Vec3D axis, float angle);
+NEOVINCDEF float NVC_Vec3D_Length(Vec3D vec);
+NEOVINCDEF Vec3D NVC_Vec3D_Plus(Vec3D vec1, Vec3D vec2);
+NEOVINCDEF Vec3D NVC_Vec3D_Minus(Vec3D vec1, Vec3D vec2);
+NEOVINCDEF float NVC_Vec3D_Dot(Vec3D vec1, Vec3D vec2);
+NEOVINCDEF Vec3D NVC_Vec3D_Cross(Vec3D vec1, Vec3D vec2);
+
+// Canvas 2D
+typedef struct {
+    int height;
+    int width;
+    int stride;
+    uint32_t *pixels;
+} NVC_Canvas;
+#define NVC_CANVAS(data, w, h, s) (NVC_Canvas) { .height = (h), .width = (w), .stride = (s), .pixels = (data) }
+#define NVC_CANVAS_NULL ((NVC_Canvas) {0})
+#define NVC_PIXEL(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
+
+NEOVINCDEF NVC_Canvas NVC_Make_Canvas(uint32_t *pixels, int width, int height, int stride);
+NEOVINCDEF NVC_Canvas NVC_Make_SubCanvas(NVC_Canvas src, Vec2D p, Vec2D s);
+
+typedef struct {
+    int x1, x2;
+    int y1, y2;
+
+    int ox1, ox2;
+    int oy1, oy2;
+} NVC_Normalized_Range;
+
+NEOVINCDEF bool  NVC_ISIN_CANVAS(NVC_Canvas oc, Vec2D p);
+NEOVINCDEF bool  NVC_NORM_RANGE(NVC_Canvas oc, Vec2D p, Vec2D s, NVC_Normalized_Range *nr);
+NEOVINCDEF float NVC_DIST_TO_LINE(Vec2D p, Vec2D p1, Vec2D p2);
+NEOVINCDEF bool  NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3);
+
 NEOVINCDEF void  NVC_Set_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Pixel(NVC_Canvas oc, Vec2D p, uint32_t color);
 
@@ -1086,10 +1089,8 @@ NEOVINCDEF void  NVC_Point(NVC_Canvas oc, Vec2D p, float r, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Circle(NVC_Canvas oc, Vec2D p, float r, float thick, uint32_t color);
 
 NEOVINCDEF void  NVC_Draw_Line(NVC_Canvas oc, Vec2D p1, Vec2D p2, uint32_t color);
-NEOVINCDEF float NVC_DIST_TO_LINE(Vec2D p, Vec2D p1, Vec2D p2);
 NEOVINCDEF void  NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick, uint32_t color);
 
-NEOVINCDEF bool  NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3);
 NEOVINCDEF void  NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color);
 NEOVINCDEF void  NVC_Draw_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, float thick, uint32_t color);
 NEOVINCDEF void  NVC_BARYCENTRIC(Vec2D p1, Vec2D p2, Vec2D p3, Vec2D p, float *u1, float *u2, float *u3, float *det);
@@ -1106,6 +1107,52 @@ typedef struct {
 #define NVC_Texture(t, w, h) (NVC_Texture) { .data = (t), .width = (w), .height = (h) }
 
 NEOVINCDEF void  NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Vec2D s);
+
+typedef struct {
+    uint32_t *pixels;
+    uint32_t *front;
+    uint32_t *space;
+    uint32_t *env;
+    float    *z_buf;
+    int width;
+    int height;
+    int stride;
+} NVC_Canvas_3D;
+#define NVC_CANVAS_3D(data, front_data, space_data, env_data, buf_data, w, h, s) (NVC_Canvas_3D) { \
+    .pixels = (data), \
+    .front = (front_data), \
+    .space = (space_data), \
+    .env = (env_data), \
+    .z_buf = (buf_data), \
+    .width = (w), \
+    .height = (h), \
+    .stride = (s) \
+}
+#define NVC_CANVAS_3D_NULL ((NVC_Canvas_3D) {0})
+#define NVC_PIXEL_3D(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_FRONT_3D(oc, x, y) (oc).front[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_SPACE_3D(oc, x, y) (oc).space[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_ENV_3D(oc, x, y) (oc).env[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_BUF_3D(oc, x, y) (oc).z_buf[(int)(y)*(oc).stride + (int)(x)]
+
+NEOVINCDEF void NVC_Clear_Pixels_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_Front_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_Space_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_Env_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_Depth_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Update_Canvas_3D(NVC_Canvas_3D oc);
+
+NEOVINCDEF void NVC_Set_Pixel_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color);
+NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color);
+
+NEOVINCDEF void NVC_Set_Env_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color);
+NEOVINCDEF void NVC_Fill_Env_3D(NVC_Canvas_3D oc, uint32_t color);
+
+NEOVINCDEF void NVC_Fill_Circle_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color);
+NEOVINCDEF void NVC_Point_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color);
+NEOVINCDEF void NVC_Fill_Triangle_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t color);
+NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t c1, uint32_t c2, uint32_t c3);
 
 #endif // NEOVIN_C_
 
@@ -1659,14 +1706,14 @@ NEOVINCDEF float NVC_DIST_TO_LINE(Vec2D p, Vec2D p1, Vec2D p2)
     float dot1 = v1x*ux + v1y*uy;
     float dot2 = v2x*ux + v2y*uy;
     if (dot1 < 0) {
-        return v1x*v1x + v1y*v1y;
+        return sqrtf(v1x*v1x + v1y*v1y);
     }
     if (dot2 > 0) {
-        return v2x*v2x + v2y*v2y;
+        return sqrtf(v2x*v2x + v2y*v2y);
     }
     float nx = v1x - ux*dot1;
     float ny = v1y - uy*dot1;
-    return nx*nx + ny*ny;
+    return sqrtf(nx*nx + ny*ny);
 }
 
 NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick, uint32_t color)
@@ -1684,8 +1731,8 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
 
     for (int x = nr.x1; x <= nr.x2; ++x) {
         for (int y = nr.y1; y <= nr.y2; ++y) {
-            if (NVC_DIST_TO_LINE(Vec2D(x+0.5f, y+0.5f), p1, p2) > (half+d)*(half+d)) continue;
-            if (NVC_DIST_TO_LINE(Vec2D(x+0.5f, y+0.5f), p1, p2) < (half-d)*(half-d)) {
+            if (NVC_DIST_TO_LINE(Vec2D(x+0.5f, y+0.5f), p1, p2) > (half+d)) continue;
+            if (NVC_DIST_TO_LINE(Vec2D(x+0.5f, y+0.5f), p1, p2) < (half-d)) {
                 NVC_Draw_Pixel(oc, Vec2D(x, y), color);
                 continue;
             }
@@ -1694,7 +1741,7 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
                 float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
                 for (int sx = 0; sx < NVC_AA_RES; ++sx) {
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
-                    if (NVC_DIST_TO_LINE(Vec2D(ax, ay), p1, p2) <= half * half) {
+                    if (NVC_DIST_TO_LINE(Vec2D(ax, ay), p1, p2) <= half) {
                         count += 1;
                     }
                 }
@@ -1711,22 +1758,10 @@ NEOVINCDEF void NVC_Draw_Line_Ex(NVC_Canvas oc, Vec2D p1, Vec2D p2, float thick,
 
 NEOVINCDEF bool NVC_IS_IN_TRIANGLE(Vec2D p, Vec2D p1, Vec2D p2, Vec2D p3)
 {
-    float v12x = p2.x - p1.x;
-    float v12y = p2.y - p1.y;
-    float v23x = p3.x - p2.x;
-    float v23y = p3.y - p2.y;
-    float v31x = p1.x - p3.x;
-    float v31y = p1.y - p3.y;
-    float v1x = p.x - p1.x;
-    float v1y = p.y - p1.y;
-    float v2x = p.x - p2.x;
-    float v2y = p.y - p2.y;
-    float v3x = p.x - p3.x;
-    float v3y = p.y - p3.y;
-    float cross1 = v1x*v12y - v1y*v12x;
-    float cross2 = v2x*v23y - v2y*v23x;
-    float cross3 = v3x*v31y - v3y*v31x;
-    return (cross1*cross2 >= 0 && cross2*cross3 >= 0);
+    float u1, u2, u3, det;
+    NVC_BARYCENTRIC(p1, p2, p3, Vec2D(p.x, p.y), &u1, &u2, &u3, &det);
+    if (fabsf(det) < 1e-7f) return false;
+    return !(u1 < 0 || u2 < 0 || u3 < 0);
 }
 
 NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, uint32_t color)
@@ -1744,9 +1779,11 @@ NEOVINCDEF void NVC_Fill_Triangle(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3, u
                 float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
                 for (int sx = 0; sx < NVC_AA_RES; ++sx) {
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
-                    if (NVC_IS_IN_TRIANGLE(Vec2D(ax, ay), p1, p2, p3)) {
-                        count += 1;
-                    }
+                    float u1, u2, u3, det;
+                    NVC_BARYCENTRIC(p1, p2, p3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
+                    if (fabsf(det) < 1e-7f) continue;
+                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    count += 1;
                 }
             }
             if (count > 0) {
@@ -1790,17 +1827,16 @@ NEOVINCDEF void NVC_Fill_Triangle_C3(NVC_Canvas oc, Vec2D p1, Vec2D p2, Vec2D p3
                 float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
                 for (int sx = 0; sx < NVC_AA_RES; ++sx) {
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
-                    if (NVC_IS_IN_TRIANGLE(Vec2D(ax, ay), p1, p2, p3)) {
-                        float u1, u2, u3, det;
-                        NVC_BARYCENTRIC(p1, p2, p3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
-                        if (det == 0) continue;
-                        uint32_t sub_color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
-                        total_r += NVC_Red(sub_color);
-                        total_g += NVC_Green(sub_color);
-                        total_b += NVC_Blue(sub_color);
-                        total_a += NVC_Alpha(sub_color);
-                        count++;
-                    }
+                    float u1, u2, u3, det;
+                    NVC_BARYCENTRIC(p1, p2, p3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
+                    if (fabsf(det) < 1e-7f) continue;
+                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    uint32_t sub_color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
+                    total_r += NVC_Red(sub_color);
+                    total_g += NVC_Green(sub_color);
+                    total_b += NVC_Blue(sub_color);
+                    total_a += NVC_Alpha(sub_color);
+                    count++;
                 }
             }
             if (count) {
@@ -1879,6 +1915,234 @@ NEOVINCDEF void NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Ve
                 int tx = (float)((x - x0)*texture.width)/w;
                 int ty = (float)((y - y0)*texture.height)/h;
                 NVC_PIXEL(oc, x, y) = NVC_PIXEL(NVC_CANVAS(texture.data, texture.width, texture.height, texture.width), tx, ty);
+            }
+        }
+    }
+}
+
+NEOVINCDEF void NVC_Clear_Pixels_3D(NVC_Canvas_3D oc)
+{
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.pixels[i] = 0;
+}
+
+NEOVINCDEF void NVC_Clear_Front_3D(NVC_Canvas_3D oc)
+{
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.front[i] = 0;
+}
+
+NEOVINCDEF void NVC_Clear_Space_3D(NVC_Canvas_3D oc)
+{
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.space[i] = 0;
+}
+
+NEOVINCDEF void NVC_Clear_Env_3D(NVC_Canvas_3D oc)
+{
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.env[i] = 0;
+}
+
+NEOVINCDEF void NVC_Clear_Depth_3D(NVC_Canvas_3D oc)
+{
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.z_buf[i] = FLT_MAX;
+}
+
+NEOVINCDEF void NVC_Clear_3D(NVC_Canvas_3D oc)
+{
+    NVC_Clear_Pixels_3D(oc);
+    NVC_Clear_Front_3D(oc);
+    NVC_Clear_Space_3D(oc);
+    NVC_Clear_Env_3D(oc);
+    NVC_Clear_Depth_3D(oc);
+}
+
+NEOVINCDEF void NVC_Update_Canvas_3D(NVC_Canvas_3D oc)
+{
+    NVC_Clear_Pixels_3D(oc);
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
+            uint32_t *pixel = &NVC_PIXEL_3D(oc, x, y);
+            uint32_t *front = &NVC_FRONT_3D(oc, x, y);
+            uint32_t *space = &NVC_SPACE_3D(oc, x, y);
+            uint32_t *env   = &NVC_ENV_3D(oc, x, y);
+            *pixel = NVC_Mix_Colors_Alpha(*pixel, *env);
+            *pixel = NVC_Mix_Colors_Alpha(*pixel, *space);
+            *pixel = NVC_Mix_Colors_Alpha(*pixel, *front);
+        }
+    }
+}
+
+NEOVINCDEF void NVC_Set_Pixel_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color)
+{
+    int x = p.x;
+    int y = p.y;
+    if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
+    NVC_FRONT_3D(oc, x, y) = color;
+    NVC_BUF_3D(oc, x, y) = 0.f;
+}
+
+NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color)
+{
+    if (p.z <= 0) return;
+    int x = p.x;
+    int y = p.y;
+    if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
+    uint32_t *space = &NVC_SPACE_3D(oc, x, y);
+    float    *z_buf = &NVC_BUF_3D(oc, x, y);
+    if (p.z <= *z_buf) {
+        *space = NVC_Mix_Colors_Alpha(*space, color);
+        *z_buf = p.z;
+    } else {
+        *space = NVC_Mix_Colors_Alpha(color, *space);
+    }
+}
+
+NEOVINCDEF void NVC_Set_Env_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color)
+{
+    int x = p.x;
+    int y = p.y;
+    if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
+    uint32_t *env = &NVC_ENV_3D(oc, x, y);
+    *env = color;
+}
+
+NEOVINCDEF void NVC_Fill_Env_3D(NVC_Canvas_3D oc, uint32_t color)
+{
+    for (int y = 0; y < oc.height; ++y) {
+        for (int x = 0; x < oc.width; ++x) {
+            uint32_t *env = &NVC_ENV_3D(oc, x, y);
+            *env = color;
+        }
+    }
+}
+
+NEOVINCDEF void NVC_Fill_Circle_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color)
+{
+    if (p.z <= 0) return;
+    r = NVC_ABS(float ,r)/p.z;
+    float cx = (1.f + p.x/p.z)*oc.width/2;
+    float cy = (1.f - p.y/p.z)*oc.height/2;
+    NVC_Normalized_Range nr;
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_NORM_RANGE(oc_2d, Vec2D(cx-r-1, cy-r-1), Vec2D(2*r+4, 2*r+4), &nr);
+
+    const float d = 2*0.7071f;
+
+    for (int y = nr.y1; y <= nr.y2; ++y) {
+        float dy = y - cy;
+        for (int x = nr.x1; x <= nr.x2; ++x) {
+            float dx = x - cx;
+            float dist = dx*dx + dy*dy;
+            if (dist >= (r + d)*(r + d)) continue;
+            if (dist <= (r - d)*(r - d)) {
+                NVC_Draw_Pixel_3D(oc, Vec3D(x, y, p.z), color);
+                continue;
+            }
+            int count = 0;
+            for (int sy = 0; sy < NVC_AA_RES; ++sy) {
+                float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
+                float ady = ay - cy;
+                for (int sx = 0; sx < NVC_AA_RES; ++sx) {
+                    float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
+                    float adx = ax - cx;
+                    float adist = adx*adx + ady*ady;
+                    if (adist <= r*r) count += 1;
+                }
+            }
+            if (count > 0) {
+                uint32_t pixel_color = color;
+                NVC_Transparent_Color(&pixel_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
+                NVC_Draw_Pixel_3D(oc, Vec3D(x, y, p.z), pixel_color);
+            }
+        }
+    }
+}
+
+NEOVINCDEF void NVC_Point_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color)
+{
+    NVC_Fill_Circle_3D(oc, p, r, color);
+}
+
+NEOVINCDEF void NVC_Fill_Triangle_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t color)
+{
+    if (p1.z <= 0 && p2.z <= 0 && p3.z <= 0) return;
+
+    Vec2D s1 = Vec2D((1.f + p1.x / p1.z) * oc.width / 2, (1.f - p1.y / p1.z) * oc.height / 2);
+    Vec2D s2 = Vec2D((1.f + p2.x / p2.z) * oc.width / 2, (1.f - p2.y / p2.z) * oc.height / 2);
+    Vec2D s3 = Vec2D((1.f + p3.x / p3.z) * oc.width / 2, (1.f - p3.y / p3.z) * oc.height / 2);
+
+    int x_min = (int)floor(fminf(s1.x, fminf(s2.x, s3.x)));
+    int y_min = (int)floor(fminf(s1.y, fminf(s2.y, s3.y)));
+    int x_max = (int)ceil(fmaxf(s1.x, fmaxf(s2.x, s3.x)));
+    int y_max = (int)ceil(fmaxf(s1.y, fmaxf(s2.y, s3.y)));
+
+    NVC_Normalized_Range nr;
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_NORM_RANGE(oc_2d, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
+
+    for (int y = nr.y1; y <= nr.y2; ++y) {
+        for (int x = nr.x1; x <= nr.x2; ++x) {
+            float z;
+            int count = 0;
+            for (int sy = 0; sy < NVC_AA_RES; ++sy) {
+                float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
+                for (int sx = 0; sx < NVC_AA_RES; ++sx) {
+                    float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
+                    float u1, u2, u3, det;
+                    NVC_BARYCENTRIC(s1, s2, s3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
+                    if (fabsf(det) < 1e-7f) continue;
+                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
+                    z = 1.0f / invZ;
+                    count += 1;
+                }
+            }
+            if (count > 0) {
+                uint32_t pixel_color = color;
+                NVC_Transparent_Color(&pixel_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
+                NVC_Draw_Pixel_3D(oc, Vec3D((float)x, (float)y, z), color);
+            }
+        }
+    }
+}
+
+NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t c1, uint32_t c2, uint32_t c3)
+{
+    if (p1.z <= 0 && p2.z <= 0 && p3.z <= 0) return;
+
+    Vec2D s1 = Vec2D((1.f + p1.x / p1.z) * oc.width / 2, (1.f - p1.y / p1.z) * oc.height / 2);
+    Vec2D s2 = Vec2D((1.f + p2.x / p2.z) * oc.width / 2, (1.f - p2.y / p2.z) * oc.height / 2);
+    Vec2D s3 = Vec2D((1.f + p3.x / p3.z) * oc.width / 2, (1.f - p3.y / p3.z) * oc.height / 2);
+
+    int x_min = (int)floor(fminf(s1.x, fminf(s2.x, s3.x)));
+    int y_min = (int)floor(fminf(s1.y, fminf(s2.y, s3.y)));
+    int x_max = (int)ceil(fmaxf(s1.x, fmaxf(s2.x, s3.x)));
+    int y_max = (int)ceil(fmaxf(s1.y, fmaxf(s2.y, s3.y)));
+
+    NVC_Normalized_Range nr;
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_NORM_RANGE(oc_2d, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
+
+    for (int y = nr.y1; y <= nr.y2; ++y) {
+        for (int x = nr.x1; x <= nr.x2; ++x) {
+            float z;
+            float u1, u2, u3, det;
+            int count = 0;
+            for (int sy = 0; sy < NVC_AA_RES; ++sy) {
+                float ay = y + NVC_AA_PAD*0.5 + sy*NVC_AA_PAD;
+                for (int sx = 0; sx < NVC_AA_RES; ++sx) {
+                    float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
+                    NVC_BARYCENTRIC(s1, s2, s3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
+                    if (fabsf(det) < 1e-7f) continue;
+                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
+                    z = 1.0f / invZ;
+                    count += 1;
+                }
+            }
+            if (count > 0) {
+                uint32_t color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
+                uint32_t pixel_color = color;
+                NVC_Transparent_Color(&pixel_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
+                NVC_Draw_Pixel_3D(oc, Vec3D((float)x, (float)y, z), color);
             }
         }
     }

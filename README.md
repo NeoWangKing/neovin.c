@@ -23,5 +23,7 @@ $ ./example
 
 ![3d](./tests/3d.png)
 
+![triangles_3d](./tests/triangles_3d.png)
+
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

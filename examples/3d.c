@@ -1,5 +1,6 @@
 #define WIDTH 800
 #define HEIGHT 600
+#define SCALE_DOWN_FACTOR 10
 #include "./tools/platform.c"
 
 #define BACKGROUND_COLOR 0xFF181818
