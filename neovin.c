@@ -32,962 +32,7 @@ typedef struct {
     int width, height;
     const char *glyphs;
 } NVC_Font;
-
-#define NVC_DEFAULT_FONT_HEIGHT 8
-#define NVC_DEFAULT_FONT_WIDTH 5
-static char default_font_glyphs[128][NVC_DEFAULT_FONT_HEIGHT][NVC_DEFAULT_FONT_WIDTH] = {
-    [' '] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['!'] = {
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['"'] = {
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {1, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['#'] = {
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {1, 1, 1, 1, 1},
-        {0, 1, 0, 1, 0},
-        {1, 1, 1, 1, 1},
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['$'] = {
-        {0, 0, 1, 0, 0},
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['%'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['&'] = {
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 1, 0, 1},
-        {1, 0, 1, 1, 0},
-        {1, 0, 0, 1, 0},
-        {0, 1, 1, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['\''] = {
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['('] = {
-        {0, 0, 0, 1, 1},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    [')'] = {
-        {1, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {1, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['*'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['+'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    [','] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['-'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['.'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['/'] = {
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['0'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 1, 1},
-        {1, 0, 1, 0, 1},
-        {1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['1'] = {
-        {0, 0, 1, 0, 0},
-        {0, 1, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['2'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['3'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['4'] = {
-        {0, 0, 0, 1, 1},
-        {0, 0, 1, 0, 1},
-        {0, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['5'] = {
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['6'] = {
-        {0, 0, 1, 1, 0},
-        {0, 1, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['7'] = {
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['8'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['9'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    [':'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    [';'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['<'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['='] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['>'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['?'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['@'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 1, 1, 1},
-        {1, 1, 0, 1, 1},
-        {1, 0, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['['] = {
-        {0, 1, 1, 1, 1},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['\\'] = {
-        {1, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    [']'] = {
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['^'] = {
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['_'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['`'] = {
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['{'] = {
-        {0, 0, 0, 1, 1},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['|'] = {
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['}'] = {
-        {1, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {1, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['~'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {1, 0, 1, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['a'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['b'] = {
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 1, 1, 0},
-        {1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['c'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['d'] = {
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 1, 1, 0, 1},
-        {1, 0, 0, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['e'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 0},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['f'] = {
-        {0, 0, 1, 1, 0},
-        {0, 1, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['g'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-    },
-    ['h'] = {
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 1, 1, 0},
-        {1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['i'] = {
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['j'] = {
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-    },
-    ['k'] = {
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 1, 0},
-        {1, 1, 1, 0, 0},
-        {1, 0, 0, 1, 0},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['l'] = {
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['m'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 1, 0, 1, 0},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['n'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['o'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['p'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 1, 1, 0},
-        {1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-    },
-    ['q'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 0, 1},
-        {1, 0, 0, 1, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-    },
-    ['r'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 1, 1, 0},
-        {1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['s'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['t'] = {
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['u'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['v'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['w'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['x'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 1, 0},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['y'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-    },
-    ['z'] = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['A'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['B'] = {
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['C'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['D'] = {
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['E'] = {
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['F'] = {
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['G'] = {
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {1, 0, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['H'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['I'] = {
-        {1, 1, 1, 1, 1},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['J'] = {
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['K'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 1, 0},
-        {1, 1, 1, 0, 0},
-        {1, 0, 0, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['L'] = {
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['M'] = {
-        {1, 0, 0, 0, 1},
-        {1, 1, 0, 1, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['N'] = {
-        {1, 0, 0, 0, 1},
-        {1, 1, 0, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 0, 0, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['O'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['P'] = {
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['Q'] = {
-        {0, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 1, 0},
-        {0, 1, 1, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['R'] = {
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['S'] = {
-        {0, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['T'] = {
-        {1, 1, 1, 1, 1},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['U'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['V'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['W'] = {
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 1, 0, 1, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['X'] = {
-        {1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 1, 0},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0},
-    },
-    ['Y'] = {
-        {1, 0, 0, 0, 1},
-        {0, 1, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0},
-    },
-    ['Z'] = {
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 1},
-        {0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {1, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0},
-    },
-};
-
+#include "default_font.c"
 static NVC_Font NVC_default_font = {
     .glyphs = &default_font_glyphs[0][0][0],
     .width = NVC_DEFAULT_FONT_WIDTH,
@@ -1055,11 +100,11 @@ typedef struct {
     int stride;
     uint32_t *pixels;
 } NVC_Canvas;
+
 #define NVC_CANVAS(data, w, h, s) (NVC_Canvas) { .height = (h), .width = (w), .stride = (s), .pixels = (data) }
 #define NVC_CANVAS_NULL ((NVC_Canvas) {0})
 #define NVC_PIXEL(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
 
-NEOVINCDEF NVC_Canvas NVC_Make_Canvas(uint32_t *pixels, int width, int height, int stride);
 NEOVINCDEF NVC_Canvas NVC_Make_SubCanvas(NVC_Canvas src, Vec2D p, Vec2D s);
 
 typedef struct {
@@ -1109,36 +154,36 @@ typedef struct {
 NEOVINCDEF void  NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Vec2D s);
 
 typedef struct {
-    uint32_t *pixels;
+    uint32_t *pixel;
     uint32_t *front;
     uint32_t *space;
-    uint32_t *env;
-    float    *z_buf;
+    uint32_t *envir;
+    float    *depth;
     int width;
     int height;
     int stride;
 } NVC_Canvas_3D;
-#define NVC_CANVAS_3D(data, front_data, space_data, env_data, buf_data, w, h, s) (NVC_Canvas_3D) { \
-    .pixels = (data), \
+#define NVC_CANVAS_3D(pixel_data, front_data, space_data, envir_data, depth_data, w, h, s) (NVC_Canvas_3D) { \
+    .pixel = (pixel_data), \
     .front = (front_data), \
     .space = (space_data), \
-    .env = (env_data), \
-    .z_buf = (buf_data), \
+    .envir = (envir_data), \
+    .depth = (depth_data), \
     .width = (w), \
     .height = (h), \
     .stride = (s) \
 }
 #define NVC_CANVAS_3D_NULL ((NVC_Canvas_3D) {0})
-#define NVC_PIXEL_3D(oc, x, y) (oc).pixels[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_PIXEL_3D(oc, x, y) (oc).pixel[(int)(y)*(oc).stride + (int)(x)]
 #define NVC_FRONT_3D(oc, x, y) (oc).front[(int)(y)*(oc).stride + (int)(x)]
 #define NVC_SPACE_3D(oc, x, y) (oc).space[(int)(y)*(oc).stride + (int)(x)]
-#define NVC_ENV_3D(oc, x, y) (oc).env[(int)(y)*(oc).stride + (int)(x)]
-#define NVC_BUF_3D(oc, x, y) (oc).z_buf[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_ENVIR_3D(oc, x, y) (oc).envir[(int)(y)*(oc).stride + (int)(x)]
+#define NVC_DEPTH_3D(oc, x, y) (oc).depth[(int)(y)*(oc).stride + (int)(x)]
 
 NEOVINCDEF void NVC_Clear_Pixels_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Clear_Front_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Clear_Space_3D(NVC_Canvas_3D oc);
-NEOVINCDEF void NVC_Clear_Env_3D(NVC_Canvas_3D oc);
+NEOVINCDEF void NVC_Clear_Envir_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Clear_Depth_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Clear_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Update_Canvas_3D(NVC_Canvas_3D oc);
@@ -1146,13 +191,15 @@ NEOVINCDEF void NVC_Update_Canvas_3D(NVC_Canvas_3D oc);
 NEOVINCDEF void NVC_Set_Pixel_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color);
 NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color);
 
-NEOVINCDEF void NVC_Set_Env_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color);
-NEOVINCDEF void NVC_Fill_Env_3D(NVC_Canvas_3D oc, uint32_t color);
+NEOVINCDEF void NVC_Set_Envir_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color);
+NEOVINCDEF void NVC_Fill_Envir_3D(NVC_Canvas_3D oc, uint32_t color);
 
 NEOVINCDEF void NVC_Fill_Circle_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color);
 NEOVINCDEF void NVC_Point_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t color);
+
 NEOVINCDEF void NVC_Draw_Line_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, uint32_t color);
 NEOVINCDEF void NVC_Draw_Line_3D_Ex(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, float thick, uint32_t color);
+
 NEOVINCDEF void NVC_Fill_Triangle_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t color);
 NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D p3, uint32_t c1, uint32_t c2, uint32_t c3);
 
@@ -1924,7 +971,7 @@ NEOVINCDEF void NVC_Draw_Texture(NVC_Canvas oc, NVC_Texture texture, Vec2D p, Ve
 
 NEOVINCDEF void NVC_Clear_Pixels_3D(NVC_Canvas_3D oc)
 {
-    for (int i = 0; i < oc.width * oc.height; ++i) oc.pixels[i] = 0;
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.pixel[i] = 0;
 }
 
 NEOVINCDEF void NVC_Clear_Front_3D(NVC_Canvas_3D oc)
@@ -1937,14 +984,14 @@ NEOVINCDEF void NVC_Clear_Space_3D(NVC_Canvas_3D oc)
     for (int i = 0; i < oc.width * oc.height; ++i) oc.space[i] = 0;
 }
 
-NEOVINCDEF void NVC_Clear_Env_3D(NVC_Canvas_3D oc)
+NEOVINCDEF void NVC_Clear_Envir_3D(NVC_Canvas_3D oc)
 {
-    for (int i = 0; i < oc.width * oc.height; ++i) oc.env[i] = 0;
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.envir[i] = 0;
 }
 
 NEOVINCDEF void NVC_Clear_Depth_3D(NVC_Canvas_3D oc)
 {
-    for (int i = 0; i < oc.width * oc.height; ++i) oc.z_buf[i] = FLT_MAX;
+    for (int i = 0; i < oc.width * oc.height; ++i) oc.depth[i] = FLT_MAX;
 }
 
 NEOVINCDEF void NVC_Clear_3D(NVC_Canvas_3D oc)
@@ -1952,7 +999,7 @@ NEOVINCDEF void NVC_Clear_3D(NVC_Canvas_3D oc)
     NVC_Clear_Pixels_3D(oc);
     NVC_Clear_Front_3D(oc);
     NVC_Clear_Space_3D(oc);
-    NVC_Clear_Env_3D(oc);
+    NVC_Clear_Envir_3D(oc);
     NVC_Clear_Depth_3D(oc);
 }
 
@@ -1964,7 +1011,7 @@ NEOVINCDEF void NVC_Update_Canvas_3D(NVC_Canvas_3D oc)
             uint32_t *pixel = &NVC_PIXEL_3D(oc, x, y);
             uint32_t *front = &NVC_FRONT_3D(oc, x, y);
             uint32_t *space = &NVC_SPACE_3D(oc, x, y);
-            uint32_t *env   = &NVC_ENV_3D(oc, x, y);
+            uint32_t *env   = &NVC_ENVIR_3D(oc, x, y);
             *pixel = NVC_Mix_Colors_Alpha(*pixel, *env);
             *pixel = NVC_Mix_Colors_Alpha(*pixel, *space);
             *pixel = NVC_Mix_Colors_Alpha(*pixel, *front);
@@ -1978,7 +1025,7 @@ NEOVINCDEF void NVC_Set_Pixel_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color)
     int y = p.y;
     if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
     NVC_FRONT_3D(oc, x, y) = color;
-    NVC_BUF_3D(oc, x, y) = 0.f;
+    NVC_DEPTH_3D(oc, x, y) = 0.f;
 }
 
 NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color)
@@ -1988,7 +1035,7 @@ NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color)
     int y = p.y;
     if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
     uint32_t *space = &NVC_SPACE_3D(oc, x, y);
-    float    *z_buf = &NVC_BUF_3D(oc, x, y);
+    float    *z_buf = &NVC_DEPTH_3D(oc, x, y);
     uint32_t tmp_color = color;
     if (p.z > 1) NVC_Bright_Color(&tmp_color, 1.0f/p.z);
     if (p.z < 1) {
@@ -2003,20 +1050,20 @@ NEOVINCDEF void NVC_Draw_Pixel_3D(NVC_Canvas_3D oc, Vec3D p, uint32_t color)
     }
 }
 
-NEOVINCDEF void NVC_Set_Env_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color)
+NEOVINCDEF void NVC_Set_Envir_3D(NVC_Canvas_3D oc, Vec2D p, uint32_t color)
 {
     int x = p.x;
     int y = p.y;
     if (x < 0 || x >= oc.width || y < 0 || y >= oc.height) return;
-    uint32_t *env = &NVC_ENV_3D(oc, x, y);
+    uint32_t *env = &NVC_ENVIR_3D(oc, x, y);
     *env = color;
 }
 
-NEOVINCDEF void NVC_Fill_Env_3D(NVC_Canvas_3D oc, uint32_t color)
+NEOVINCDEF void NVC_Fill_Envir_3D(NVC_Canvas_3D oc, uint32_t color)
 {
     for (int y = 0; y < oc.height; ++y) {
         for (int x = 0; x < oc.width; ++x) {
-            uint32_t *env = &NVC_ENV_3D(oc, x, y);
+            uint32_t *env = &NVC_ENVIR_3D(oc, x, y);
             *env = color;
         }
     }
@@ -2029,7 +1076,7 @@ NEOVINCDEF void NVC_Fill_Circle_3D(NVC_Canvas_3D oc, Vec3D p, float r, uint32_t 
     float cx = (1.f + p.x/p.z)*oc.width/2;
     float cy = (1.f - p.y/p.z)*oc.height/2;
     NVC_Normalized_Range nr;
-    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixel, oc.width, oc.height, oc.stride);
     NVC_NORM_RANGE(oc_2d, Vec2D(cx-r-1, cy-r-1), Vec2D(2*r+4, 2*r+4), &nr);
 
     const float d = 2*0.7071f;
@@ -2139,7 +1186,7 @@ NEOVINCDEF void NVC_Draw_Line_3D_Ex(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, float 
     float invZ2 = 1.0f / p2.z;
 
     NVC_Normalized_Range nr;
-    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixel, oc.width, oc.height, oc.stride);
     NVC_NORM_RANGE(oc_2d, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
 
     const float d = 2 * 0.7071f;
@@ -2208,7 +1255,7 @@ NEOVINCDEF void NVC_Fill_Triangle_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D
     int y_max = (int)ceil(fmaxf(s1.y, fmaxf(s2.y, s3.y)));
 
     NVC_Normalized_Range nr;
-    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixel, oc.width, oc.height, oc.stride);
     NVC_NORM_RANGE(oc_2d, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
 
     for (int y = nr.y1; y <= nr.y2; ++y) {
@@ -2224,7 +1271,7 @@ NEOVINCDEF void NVC_Fill_Triangle_3D(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Vec3D
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
                     NVC_BARYCENTRIC(s1, s2, s3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
                     if (fabsf(det) < 1e-7f) continue;
-                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    if (u1 < -1e-3f || u2 < -1e-3f || u3 < -1e-3f) continue;
                     float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
                     z = 1.0f / invZ;
                     total_r += NVC_Red(color);
@@ -2267,7 +1314,7 @@ NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Ve
     int y_max = (int)ceil(fmaxf(s1.y, fmaxf(s2.y, s3.y)));
 
     NVC_Normalized_Range nr;
-    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixels, oc.width, oc.height, oc.stride);
+    NVC_Canvas oc_2d = NVC_CANVAS(oc.pixel, oc.width, oc.height, oc.stride);
     NVC_NORM_RANGE(oc_2d, Vec2D(x_min, y_min), Vec2D(x_max - x_min, y_max - y_min), &nr);
 
     for (int y = nr.y1; y <= nr.y2; ++y) {
@@ -2283,7 +1330,7 @@ NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Ve
                     float ax = x + NVC_AA_PAD*0.5 + sx*NVC_AA_PAD;
                     NVC_BARYCENTRIC(s1, s2, s3, Vec2D(ax, ay), &u1, &u2, &u3, &det);
                     if (fabsf(det) < 1e-7f) continue;
-                    if (u1 < 0 || u2 < 0 || u3 < 0) continue;
+                    if (u1 < -1e-3f || u2 < -1e-3f || u3 < -1e-3f) continue;
                     float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
                     z = 1.0f / invZ;
                     uint32_t sub_color = NVC_Mix_Colors3(c1, c2, c3, u1, u2, u3);
@@ -2298,6 +1345,7 @@ NEOVINCDEF void NVC_Fill_Triangle_3D_C3(NVC_Canvas_3D oc, Vec3D p1, Vec3D p2, Ve
                 NVC_BARYCENTRIC(s1, s2, s3, Vec2D(x + 0.5f, y + 0.5f), &u1, &u2, &u3, &det);
                 float invZ = u1 / p1.z + u2 / p2.z + u3 / p3.z;
                 z = 1.0f / invZ;
+                if (z < 1e-6) continue;
                 final_color = NVC_RGBA(total_r/count, total_g/count, total_b/count, total_a/count);
                 NVC_Transparent_Color(&final_color, ((float)count/(NVC_AA_RES*NVC_AA_RES)));
                 NVC_Draw_Pixel_3D(oc, Vec3D((float)x, (float)y, z), final_color);

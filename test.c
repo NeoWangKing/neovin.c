@@ -366,7 +366,7 @@ bool triangles_3d_example(const char *file_path)
     float    z_buf[WIDTH*HEIGHT];
 
     NVC_Canvas_3D oc_3d = NVC_CANVAS_3D(oc.pixels, front, space, env, z_buf, WIDTH, HEIGHT, WIDTH);
-    NVC_Fill_Env_3D(oc_3d, BACKGROUND_COLOR);
+    NVC_Fill_Envir_3D(oc_3d, BACKGROUND_COLOR);
     NVC_Clear_Front_3D(oc_3d);
     NVC_Clear_Space_3D(oc_3d);
     NVC_Clear_Depth_3D(oc_3d);

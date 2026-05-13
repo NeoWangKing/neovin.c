@@ -29,7 +29,7 @@ uint32_t *render(float dt)
     angle += 0.1 * M_PI * dt;
 
     NVC_Canvas_3D oc = NVC_CANVAS_3D(pixels, front, space, env, z_buf, WIDTH, HEIGHT, WIDTH);
-    NVC_Fill_Env_3D(oc, BACKGROUND_COLOR);
+    NVC_Fill_Envir_3D(oc, BACKGROUND_COLOR);
     NVC_Clear_Space_3D(oc);
     NVC_Clear_Front_3D(oc);
     NVC_Clear_Depth_3D(oc);
@@ -87,12 +87,12 @@ uint32_t *render(float dt)
     NVC_Draw_Line_3D_Ex(oc, v7, v8, 2, 0xFF000000);
     NVC_Draw_Line_3D_Ex(oc, v8, v5, 2, 0xFF000000);
 
-    NVC_Draw_Line_3D_Ex(oc, v1, v3, 2, 0xFF000000);
-    NVC_Draw_Line_3D_Ex(oc, v1, v6, 2, 0xFF000000);
-    NVC_Draw_Line_3D_Ex(oc, v4, v5, 2, 0xFF000000);
-    NVC_Draw_Line_3D_Ex(oc, v2, v7, 2, 0xFF000000);
-    NVC_Draw_Line_3D_Ex(oc, v5, v7, 2, 0xFF000000);
-    NVC_Draw_Line_3D_Ex(oc, v3, v8, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v1, v3, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v1, v6, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v4, v5, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v2, v7, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v5, v7, 2, 0xFF000000);
+    // NVC_Draw_Line_3D_Ex(oc, v3, v8, 2, 0xFF000000);
 
     NVC_Canvas oc_2d = NVC_CANVAS(oc.front, oc.width, oc.height, oc.stride);
     float font_size = 24;
