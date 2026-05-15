@@ -16,10 +16,10 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-#define ROWS 6
-#define COLS 8
-#define CELL_HEIGHT 100
-#define CELL_WIDTH 100
+#define ROWS 12
+#define COLS 16
+#define CELL_HEIGHT 50
+#define CELL_WIDTH 50
 
 #define BACKGROUND_COLOR 0xFF181818
 #define FOREGROUND_COLOR 0xFF5050FF
@@ -299,7 +299,7 @@ bool render_3d_example(const char *file_path)
                 if (p.z > FOV) NVC_Bright_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
                 if (p.z > FOV) NVC_Transparent_Color(&tmp_color, 1.0f/(1 + 2*(p.z - FOV)));
 
-                NVC_Point(oc, Vec2D(p.x/2*WIDTH/p.z + (float)WIDTH/2, p.y/2*HEIGHT/p.z + (float)HEIGHT/2), 5.0f*FOV / p.z, tmp_color);
+                NVC_Draw_Point(oc, Vec2D(p.x/2*WIDTH/p.z + (float)WIDTH/2, p.y/2*HEIGHT/p.z + (float)HEIGHT/2), 5.0f*FOV / p.z, tmp_color);
             }
         }
     }
@@ -330,10 +330,11 @@ bool texture_example(const char *file_path)
     // 0xAABBGGRR
     NVC_Fill_Background(oc, BACKGROUND_COLOR);
 
-    const char *png_file_path = "NeoWangKing.png";
+    const char *png_file_path = "./imgs/neowang.png";
     NVC_Texture texture;
-    texture.data = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
-    if (texture.data == NULL) {
+    texture.pixels = (uint32_t*) stbi_load(png_file_path, &texture.width, &texture.height, NULL, 4);
+    texture.stride = texture.width;
+    if (texture.pixels == NULL) {
         fprintf(stderr, "ERROR: could not read file %s: %s\n", png_file_path, strerror(errno));
     }
 
@@ -404,6 +405,41 @@ bool triangles_3d_example(const char *file_path)
     return save_as_png(file_path);
 }
 
+bool ellipse_example(const char *file_path)
+{
+    // 0xAABBGGRR
+    NVC_Fill_Background(oc, BACKGROUND_COLOR);
+
+    for (int y = 0; y < ROWS; ++y) {
+        for (int x = 0; x < COLS; ++x) {
+            float u = (float)x / COLS;
+            float w = u*CELL_WIDTH;
+            float v = (float)y / ROWS;
+            float h = v*CELL_HEIGHT;
+            float t = (u + v)/2;
+
+            float radius = CELL_WIDTH;
+            uint32_t color = 0xFF5050FF;
+            NVC_Transparent_Color(&color, t);
+            if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
+            if ((x+y)%2) {
+                float px = x*CELL_WIDTH + (float)CELL_WIDTH/2 - w/2;
+                float py = y*CELL_HEIGHT + (float)CELL_HEIGHT/2 - h/2;
+                NVC_Fill_Ellipse(oc, Vec2D(px, py), Vec2D(w, h), color);
+            } else {
+                float px = x*CELL_WIDTH + (float)CELL_WIDTH/2 - w/2;
+                float py = y*CELL_HEIGHT + (float)CELL_HEIGHT/2 - h/2;
+                NVC_Fill_Ellipse(oc, Vec2D(px, py), Vec2D(w, h), color);
+            }
+        }
+    }
+
+    float font_size = 24;
+    NVC_Text(oc, "Ellipse E.X.", Vec2D(10, 10), NVC_default_font, font_size, 0xFFFFFFFF);
+
+    return save_as_png(file_path);
+}
+
 int main(void)
 {
     oc.width = WIDTH;
@@ -422,6 +458,7 @@ int main(void)
     if (!text_example("tests/text.png")) return -1;
     if (!texture_example("tests/texture.png")) return -1;
     if (!triangles_3d_example("tests/triangles_3d.png")) return -1;
+    if (!ellipse_example("tests/ellipses.png")) return -1;
 
     return 0;
 }

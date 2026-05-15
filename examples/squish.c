@@ -25,12 +25,14 @@ uint32_t *render(float dt)
     angle += 6 * M_PI * dt;
 
     NVC_Texture texture;
-    texture.data = amiya_data;
+    texture.pixels = amiya_data;
     texture.width = amiya_width;
     texture.height = amiya_height;
+    texture.stride = amiya_width;
     // texture.data = neowang_data;
     // texture.width = neowang_width;
     // texture.height = neowang_height;
+    // texture.stride = neowang_width;
 
 
     NVC_Canvas oc = NVC_CANVAS(pixels, WIDTH, HEIGHT, WIDTH);

@@ -34,19 +34,19 @@ uint32_t *render(float dt)
     NVC_Clear_Front_3D(oc);
     NVC_Clear_Depth_3D(oc);
 
-    Vec3D p0 = Vec3D(0.0f, 0.0f, 1 + (float)SQUARE_SIZE*sqrtf(3.0f)/2);
+    Vec3D p0 = Vec3D(0.0f, 0.0f, 1.5 + (float)SQUARE_SIZE*sqrtf(3.0f)/2);
     Vec3D axis_x = Vec3D(1.0f, 0.0f, 0.0f);
     Vec3D axis_y = Vec3D(0.0f, 1.0f, 0.0f);
     Vec3D axis_z = Vec3D(0.0f, 0.0f, 1.0f);
 
-    Vec3D v1 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c1 = 0xFF000000;
-    Vec3D v2 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c2 = 0xFF0000FF;
-    Vec3D v3 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c3 = 0xFF00FFFF;
-    Vec3D v4 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c4 = 0xFF00FF00;
-    Vec3D v5 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c5 = 0xFFFF0000;
-    Vec3D v6 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c6 = 0xFFFF00FF;
-    Vec3D v7 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c7 = 0xFFFFFFFF;
-    Vec3D v8 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c8 = 0xFFFFFF00;
+    Vec3D v1 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c1 = 0x88000000;
+    Vec3D v2 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c2 = 0x880000FF;
+    Vec3D v3 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c3 = 0x8800FFFF;
+    Vec3D v4 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y - SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c4 = 0x8800FF00;
+    Vec3D v5 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c5 = 0x88FF0000;
+    Vec3D v6 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z - SQUARE_SIZE/2); uint32_t c6 = 0x88FF00FF;
+    Vec3D v7 = Vec3D(p0.x + SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c7 = 0x88FFFFFF;
+    Vec3D v8 = Vec3D(p0.x - SQUARE_SIZE/2, p0.y + SQUARE_SIZE/2, p0.z + SQUARE_SIZE/2); uint32_t c8 = 0x88FFFF00;
     NVC_ROTATE_POINT(&v1, p0, axis_y, angle); NVC_ROTATE_POINT(&v1, p0, axis_x, angle); NVC_ROTATE_POINT(&v1, p0, axis_z, angle);
     NVC_ROTATE_POINT(&v2, p0, axis_y, angle); NVC_ROTATE_POINT(&v2, p0, axis_x, angle); NVC_ROTATE_POINT(&v2, p0, axis_z, angle);
     NVC_ROTATE_POINT(&v3, p0, axis_y, angle); NVC_ROTATE_POINT(&v3, p0, axis_x, angle); NVC_ROTATE_POINT(&v3, p0, axis_z, angle);
@@ -55,6 +55,14 @@ uint32_t *render(float dt)
     NVC_ROTATE_POINT(&v6, p0, axis_y, angle); NVC_ROTATE_POINT(&v6, p0, axis_x, angle); NVC_ROTATE_POINT(&v6, p0, axis_z, angle);
     NVC_ROTATE_POINT(&v7, p0, axis_y, angle); NVC_ROTATE_POINT(&v7, p0, axis_x, angle); NVC_ROTATE_POINT(&v7, p0, axis_z, angle);
     NVC_ROTATE_POINT(&v8, p0, axis_y, angle); NVC_ROTATE_POINT(&v8, p0, axis_x, angle); NVC_ROTATE_POINT(&v8, p0, axis_z, angle);
+    NVC_Draw_Dot(oc, v1, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v2, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v3, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v4, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v5, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v6, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v7, 2, 0xFFFFFFFF);
+    NVC_Draw_Dot(oc, v8, 2, 0xFFFFFFFF);
 
     NVC_Fill_Triangle_3D_C3(oc, v1, v2, v3, c1, c2, c3);
     NVC_Fill_Triangle_3D_C3(oc, v1, v4, v3, c1, c4, c3);
