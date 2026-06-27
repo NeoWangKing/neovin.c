@@ -10,25 +10,35 @@ cd "$HOME/emsdk" > /dev/null 2>&1
 . ./emsdk_env.sh > /dev/null 2>&1
 cd "$CURDIR" > /dev/null 2>&1
 
+UNAME_S=$(uname -s)
+if [ "$UNAME_S" = "Darwin" ]; then
+    # macOS 专用链接选项
+    RL_LIBS="$LIBS $(pkg-config --libs raylib) -framework CoreFoundation -framework CoreGraphics -framework CoreVideo -framework IOKit -framework Cocoa -framework OpenGL"
+elif [ "$UNAME_S" = "Linux" ]; then
+    # Linux 专用链接选项
+    RL_LIBS="$LIBS $(pkg-config --libs raylib) -lX11 -lXrandr -lXi -lXcursor -lXinerama -lGL -lpthread -ldl"
+else
+    echo "Unsupported OS: $UNAME_S"
+    exit 1
+fi
+
 build_NVC() {
   NAME=$1
 
-  gcc $CFLAGS -I. -DPLATFORM=TERM_PLATFORM -o ./bin/$NAME.term $NAME.c
-  gcc $CFLAGS -I. -DPLATFORM=RAYLIB_PLATFORM `pkg-config --cflags raylib`\
-    -o ./bin/$NAME.rl $NAME.c\
-    $LIBS `pkg-config --libs raylib` -lm\
-    -framework CoreFoundation\
-    -framework CoreGraphics\
-    -framework CoreVideo\
-    -framework IOKit\
-    -framework Cocoa\
-    -framework OpenGL
-  emcc -I. -DPLATFORM=WASM_PLATFORM\
-    -o ./bin/$NAME.wasm $NAME.c\
-    -s STANDALONE_WASM=1\
-    -s EXPORTED_FUNCTIONS='["_render","_malloc","_free"]'\
-    --no-entry\
-    -lm
+  # 终端版本
+  gcc $CFLAGS -I. -DPLATFORM=TERM_PLATFORM -o ./bin/$NAME.term $NAME.c -lm
+
+  # Raylib 图形版本
+  gcc $CFLAGS -I. -DPLATFORM=RAYLIB_PLATFORM `pkg-config --cflags raylib` \
+      -o ./bin/$NAME.rl $NAME.c $RL_LIBS
+
+  # WASM 版本
+  emcc -I. -DPLATFORM=WASM_PLATFORM \
+      -o ./bin/$NAME.wasm $NAME.c \
+      -s STANDALONE_WASM=1 \
+      -s EXPORTED_FUNCTIONS='["_render","_malloc","_free"]' \
+      --no-entry \
+      -lm
 }
 
 set -xe
